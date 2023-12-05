@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      database: ${MONGO_DATABASE:clm}
+      uri: mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_CLUSTER}.1syajun.mongodb.net/?retryWrites=true&w=majority
+
+clm:
+  jwt:
+    secret-key: 711a92992d40a1cc0bf64ab3837050ef3dfc26aa42a9623383e67ba72ba788dd
+    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:300000}
+    refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:86400000}
+    refresh-token-historical: ${JWT_REFRESH_TOKEN_HISTORICAL:2592000000}
+    cookie-name: ${JWT_COOKIE_NAME:clm-cookie}
