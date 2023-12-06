@@ -43,7 +43,7 @@ public class AuthController {
   /**
    * Refresh the jwt token.
    *
-   * @param request the request
+   * @param request the request with the refresh token
    * @return the new access token and new refresh token
    */
   @PostMapping("/refresh-token")

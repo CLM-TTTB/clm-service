@@ -1,71 +1,57 @@
 package com.clm.api.auth;
 
-import com.clm.api.exceptions.ExceptionResponse;
 import com.clm.api.exceptions.business.HttpHeaderMissingException;
+import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.security.RefreshToken;
 import com.clm.api.security.RefreshTokenRepository;
 import com.clm.api.utils.HttpHeaderHelper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Date;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /** LogoutService */
 @Service
-@lombok.RequiredArgsConstructor
 public class LogoutServiceImpl implements LogoutHandler {
 
-  private final RefreshTokenRepository refreshTokenRepository;
+  private RefreshTokenRepository refreshTokenRepository;
+  private HandlerExceptionResolver resolver;
 
-  private void returnResponse(
-      HttpServletRequest request, HttpServletResponse response, HttpStatus status, String message) {
-    ExceptionResponse exceptionResponse =
-        ExceptionResponse.builder()
-            .status(status)
-            .message(message)
-            .path(request.getServletPath())
-            .code(status.value())
-            .timestamp(new Date())
-            .build();
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setStatus(status.value());
-    try {
-      new ObjectMapper().writeValue(response.getOutputStream(), exceptionResponse);
-    } catch (IOException e) {
-      System.out.println(e.getMessage());
-    }
+  public LogoutServiceImpl(
+      @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
+      RefreshTokenRepository refreshTokenRepository) {
+    this.resolver = resolver;
+    this.refreshTokenRepository = refreshTokenRepository;
   }
 
   @Override
+  @Transactional
   public void logout(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
     try {
       final String refreshToken = HttpHeaderHelper.getBearerToken(request);
 
       RefreshToken savedRefreshToken =
-          refreshTokenRepository.findByToken(refreshToken).orElse(null);
-
-      if (savedRefreshToken == null) {
-        returnResponse(request, response, HttpStatus.NOT_FOUND, "Refresh token not found");
-        return;
-      }
+          refreshTokenRepository
+              .findByToken(refreshToken)
+              .orElseThrow(() -> new NotFoundException("Refresh token not found"));
 
       refreshTokenRepository.save(savedRefreshToken.revoke());
-
       SecurityContextHolder.clearContext();
-      response.setStatus(HttpStatus.OK.value());
+      response.setStatus(HttpStatus.NO_CONTENT.value());
 
-    } catch (HttpHeaderMissingException e) {
-      returnResponse(request, response, e.getStatus(), e.getMessage());
+    } catch (NotFoundException notFoundException) {
+      resolver.resolveException(request, response, null, notFoundException);
+    } catch (HttpHeaderMissingException httpHeaderMissingException) {
+      resolver.resolveException(request, response, null, httpHeaderMissingException);
     } catch (Exception e) {
-      returnResponse(request, response, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      resolver.resolveException(request, response, null, e);
     }
   }
 }

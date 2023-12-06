@@ -54,7 +54,7 @@ public class AuthExceptionHandler extends CustomExceptionHandler {
   public ExceptionResponse handleBadCredentialsException(
       AuthenticationException e, HttpServletRequest request) {
     return buildErrorMessage(
-        HttpStatus.NOT_FOUND, ErrorMessage.USER_OR_PASSWORD_INVALID, e, request);
+        HttpStatus.NOT_FOUND, ErrorMessage.USER_OR_PASSWORD_INCORRECT, e, request);
   }
 
   @ExceptionHandler({

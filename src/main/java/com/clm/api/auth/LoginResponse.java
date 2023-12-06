@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /** LoginResponse */
 @lombok.Getter
+@lombok.Setter
 @lombok.Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginResponse {

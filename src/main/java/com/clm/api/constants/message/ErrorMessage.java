@@ -13,5 +13,7 @@ public class ErrorMessage {
   public static final String REFRESH_TOKEN_REVOKED = "Refresh token is revoked, please login again";
   public static final String REFRESH_TOKEN_EXPIRED = "Refresh token is expired, please login again";
 
-  public static final String USER_OR_PASSWORD_INVALID = "Username or password is invalid";
+  public static final String USER_OR_PASSWORD_INCORRECT = "Username or password is incorrect";
+
+  public static final String LOGIN_REQUIRED = "Please login to access this resource";
 }

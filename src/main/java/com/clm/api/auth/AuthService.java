@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface AuthService {
 
   /**
-   * Logs in the user with the provided credentials and returns an `AuthResponse` containing
-   * authentication and authorization tokens.
+   * Logs in the user with the provided credentials and returns an LoginResponse DTO containing
+   * authentication and authorization tokens and some user information.
    *
    * @param loginRequest DTO containing user credentials for login.
    * @return LoginResponse DTO containing authentication and authorization tokens.
