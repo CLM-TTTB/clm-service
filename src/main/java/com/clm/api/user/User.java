@@ -13,7 +13,9 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -48,12 +50,12 @@ public class User implements UserDetails {
   @JsonIgnore
   private String password;
 
-  private String name;
+  @lombok.Builder.Default private String name = "User" + System.currentTimeMillis();
 
   @lombok.Builder.Default private String avatar = "";
 
-  @lombok.Builder.Default private Instant createdAt = Instant.now();
-  @lombok.Builder.Default private Instant updateAt = Instant.now();
+  @lombok.Builder.Default @CreatedDate private Instant createdAt = Instant.now();
+  @lombok.Builder.Default @LastModifiedDate private Instant updateAt = Instant.now();
 
   @lombok.Builder.Default private Status status = Status.EMAIL_UNVERIFIED;
 
@@ -62,9 +64,8 @@ public class User implements UserDetails {
 
   public User() {
     this.avatar = "";
-    this.name = "User-" + System.currentTimeMillis();
-    this.createdAt = Instant.now();
-    this.updateAt = Instant.now();
+    this.name = "User" + System.currentTimeMillis();
+    this.status = Status.EMAIL_UNVERIFIED;
   }
 
   @Override
@@ -108,7 +109,6 @@ public class User implements UserDetails {
 
   @Override
   public boolean isAccountNonLocked() {
-    // return true;
     return status != Status.BANNED;
   }
 

@@ -2,7 +2,9 @@ package com.clm.api.security;
 
 import java.util.Date;
 import java.util.UUID;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /** Token */
@@ -23,32 +25,22 @@ public class RefreshToken {
   private Date expiresAt;
   private Date revokedAt;
 
-  // this is the time the token was created
-  // to be used to track when the user last logged in
-  @lombok.Builder.Default private Date createdAt = new Date();
+  @lombok.Builder.Default @CreatedDate private Date createdAt = new Date();
+  @lombok.Builder.Default @LastModifiedDate private Date updatedAt = new Date();
 
-  // this is the time the token was last updated
-  @lombok.Builder.Default private Date updatedAt = new Date();
+  public RefreshToken() {
+    this.revoked = false;
+    this.token = UUID.randomUUID().toString();
+  }
 
   public RefreshToken(String username, Date expiresAt) {
-    this.revoked = false;
+    this();
     this.username = username;
     this.expiresAt = expiresAt;
-
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-    this.token = UUID.randomUUID().toString();
   }
 
   public RefreshToken(String username, long expirationTimeInMs) {
     this(username, new Date(System.currentTimeMillis() + expirationTimeInMs));
-  }
-
-  public RefreshToken() {
-    this.revoked = false;
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-    this.token = UUID.randomUUID().toString();
   }
 
   public boolean isExpired() {
@@ -57,7 +49,6 @@ public class RefreshToken {
 
   public RefreshToken updateToken() {
     this.token = UUID.randomUUID().toString();
-    this.updatedAt = new Date();
     return this;
   }
 
@@ -66,7 +57,6 @@ public class RefreshToken {
       this.revoked = true;
       this.revokedAt = new Date();
     }
-
     return this;
   }
 }
