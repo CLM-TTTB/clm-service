@@ -17,6 +17,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,9 +41,11 @@ public class User implements UserDetails {
     UNKNOWN,
   };
 
-  @Id
+  @Id private String id;
+
   @Email(message = ErrorMessage.EMAIL_INVALID)
   @NotBlank(message = ErrorMessage.EMAIL_REQUIRED)
+  @Indexed
   private String email;
 
   @NotBlank(message = ErrorMessage.EMAIL_REQUIRED)

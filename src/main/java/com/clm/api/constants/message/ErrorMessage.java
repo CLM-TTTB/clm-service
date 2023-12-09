@@ -16,4 +16,16 @@ public class ErrorMessage {
   public static final String USER_OR_PASSWORD_INCORRECT = "Username or password is incorrect";
 
   public static final String LOGIN_REQUIRED = "Please login to access this resource";
+
+  public static final String NUMBER_OF_TEAMS_INVALID =
+      "Number of teams is invalid, must be at least 2";
+
+  public static final String NUMBER_OF_PLAYERS_INVALID =
+      "Number of players is invalid, must be at least 2";
+
+  public static final String PHONE_NUMBER_INVALID = "Phone number is invalid";
+
+  public static final String AGE_INVALID = "Age is invalid, must be at least 6";
+
+  public static final String AGE_GROUP_INVALID = "Age group is invalid";
 }

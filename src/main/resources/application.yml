@@ -11,3 +11,18 @@ clm:
     refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:86400000}
     refresh-token-historical: ${JWT_REFRESH_TOKEN_HISTORICAL:2592000000}
     cookie-name: ${JWT_COOKIE_NAME:clm-cookie}
+# email:
+#   host: ${EMAIL_HOST:smtp.gmail.com}
+#   tsl-port: ${EMAIL_PORT:587}
+#   ssl-port: ${EMAIL_SSL_PORT:465}
+#   account: ${EMAIL_IDENTIFIER:champsmanagement03@gmail.com}
+#   password: ${EMAIL_PASSWORD:zkmoezwkdursnxmg}
+
+# mail:
+#   smtp:
+#     auth: true,
+#     host: smtp.gmail.com
+#     starttls:
+#       enable: true
+#       required: true
+#     port: 587

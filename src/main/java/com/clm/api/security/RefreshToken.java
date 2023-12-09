@@ -28,7 +28,7 @@ public class RefreshToken {
   @lombok.Builder.Default @CreatedDate private Date createdAt = new Date();
   @lombok.Builder.Default @LastModifiedDate private Date updatedAt = new Date();
 
-  public RefreshToken() {
+  private RefreshToken() {
     this.revoked = false;
     this.token = UUID.randomUUID().toString();
   }
