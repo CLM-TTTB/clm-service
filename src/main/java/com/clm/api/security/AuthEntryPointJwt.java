@@ -11,9 +11,11 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-@Component
 @Slf4j
+@Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
+
+  private static final long serialVersionUID = 1L;
 
   private final HandlerExceptionResolver resolver;
 

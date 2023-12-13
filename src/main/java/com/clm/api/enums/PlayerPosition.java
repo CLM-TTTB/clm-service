@@ -1,7 +1,7 @@
 package com.clm.api.enums;
 
 /** PlayingPosition */
-public enum PlayingPosition {
+public enum PlayerPosition {
   GOALKEEPER,
   DEFENDER,
   MIDFIELDER,

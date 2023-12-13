@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 @lombok.RequiredArgsConstructor
 public class JwtService {
+  private static final long serialVersionUID = 1L;
 
   @Value("${clm.jwt.secret-key}")
   private String JWT_SECRET_KEY;
