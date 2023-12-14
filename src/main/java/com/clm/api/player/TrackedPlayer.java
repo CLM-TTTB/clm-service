@@ -45,6 +45,10 @@ public class TrackedPlayer extends Player implements ICard {
         CardFactory.createYellowCard(CardFactory.CardType.ONE_GAME, gameId, yellowCards.getLast()));
   }
 
+  public void addRedCard(Instant time, String gameId) {
+    redCards.add(CardFactory.createRedCard(gameId));
+  }
+
   /**
    * Checks if the player is suspended for the this game
    *
@@ -72,13 +76,13 @@ public class TrackedPlayer extends Player implements ICard {
   }
 
   public boolean isSuspended(Game game) {
-    return isSuspended(game.getId());
+    return isSuspended(game.getPreviousGameId());
   }
 
   public List<String> getPlayedGameIds() {
     Set<String> gameIds = new HashSet<>();
     if (hasPlayedAtLeastOneGame()) {
-      positions.forEach(position -> gameIds.add(position.getGameId()));
+      positions.stream().forEach(position -> gameIds.add(position.getGameId()));
     }
     return new LinkedList<>(gameIds);
   }

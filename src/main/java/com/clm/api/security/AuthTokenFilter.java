@@ -19,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @lombok.RequiredArgsConstructor
 public class AuthTokenFilter extends OncePerRequestFilter {
+
   private static final long serialVersionUID = 1L;
 
   private final JwtService jwtService;

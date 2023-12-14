@@ -21,11 +21,10 @@ public class Game {
   public class TeamTracking {
     private String teamId;
     private String uniform;
-    // score of the team in the game
-    private int score;
   }
 
   @Id private String id;
+
   private String nextGameId;
   private String previousGameId;
   private String tournamentId;

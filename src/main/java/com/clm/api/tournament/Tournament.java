@@ -3,6 +3,7 @@ package com.clm.api.tournament;
 import com.clm.api.constants.Regex;
 import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.enums.AgeGroup;
+import com.clm.api.enums.CompetitionType;
 import com.clm.api.enums.Visibility;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -27,12 +28,6 @@ public class Tournament {
     UPCOMING,
     ONGOING,
     FINISHED
-  }
-
-  public static enum CompetitionType {
-    KNOCKOUT,
-    ROUND_ROBIN,
-    ROUND_ROBIN_WITH_KNOCKOUT
   }
 
   @Id private String id;

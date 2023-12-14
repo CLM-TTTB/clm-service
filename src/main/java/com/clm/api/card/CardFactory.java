@@ -97,6 +97,10 @@ public class CardFactory {
     return createRedCard(CardType.ONE_GAME, time, gameId);
   }
 
+  public static Card createRedCard(String gameId) {
+    return createRedCard(CardType.ONE_GAME, Instant.now(), gameId);
+  }
+
   public static Card createCard(
       CardColor color, CardType type, Instant time, String gameId, Card previousCard) {
     return createCard(color, type, time, gameId, null, previousCard);
