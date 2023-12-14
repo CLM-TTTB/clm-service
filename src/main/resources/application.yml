@@ -13,3 +13,9 @@ clm:
     cookie-name: ${JWT_COOKIE_NAME:clm-cookie}
   props:
     max-team-template: 3
+
+email:
+  host: ${EMAIL_HOST:smtp.gmail.com}
+  port: ${EMAIL_PORT:587}
+  username: ${EMAIL_USERNAME:champsmanagement03@gmail.com}
+  password: ${EMAIL_PASSWORD:keongqikngzilclv}

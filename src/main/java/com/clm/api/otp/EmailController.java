@@ -1,5 +1,7 @@
 package com.clm.api.otp;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,11 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 @lombok.RequiredArgsConstructor
 public class EmailController {
 
-  private final OtpService otpService;
+  private final TwoStepVerificationService twoStepVerificationService;
 
   @PostMapping("/send")
   public String send() {
-    otpService.send("sontungexpt@gmail.com");
+    Map<String, Object> props = new HashMap<>();
+    props.put("subject", "Hi");
+    props.put("body", "123");
+    twoStepVerificationService.send("sontungexpt@gmail.com", props);
     return "OK";
   }
 }
