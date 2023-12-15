@@ -33,8 +33,8 @@ public class EmailVerificationService implements TwoStepVerificationService {
   @Value("${email.password}")
   private String APP_PASSWORD;
 
-  @Value("${clm.api.url}")
-  private String API_URL;
+  @Value("${clm.api.url.v1}")
+  private String API_V1_URL;
 
   @PostConstruct
   public void init() {}
@@ -98,7 +98,7 @@ public class EmailVerificationService implements TwoStepVerificationService {
   public String generateVerificationLink(
       String identifier, EmailVerificationToken emailVerificationToken) {
     String link =
-        API_URL
+        API_V1_URL
             + "/v1/auth/two-step-verification/email?token="
             + UriEncoder.encode(emailVerificationToken.getToken())
             + "&email="

@@ -1,4 +1,4 @@
-package com.clm.api.player;
+package com.clm.api.team.member.player;
 
 import com.clm.api.card.Card;
 import com.clm.api.card.CardFactory;

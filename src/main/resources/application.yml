@@ -7,7 +7,9 @@ spring:
 clm:
   url: ${CLM_URL:http://localhost:8080}
   api:
-    url: ${CLM_API_URL:http://localhost:8080}
+    url:
+      v1: ${CLM_API_V1_URL:http://localhost:8080/v1}
+
   jwt:
     secret-key: 711a92992d40a1cc0bf64ab3837050ef3dfc26aa42a9623383e67ba72ba788dd
     access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:300000}

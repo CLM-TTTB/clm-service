@@ -1,6 +1,6 @@
-package com.clm.api.player;
+package com.clm.api.team.member.player;
 
-import com.clm.api.team.TeamMember;
+import com.clm.api.team.member.TeamMember;
 import java.util.List;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,11 +16,10 @@ public class Player extends TeamMember {
 
   public Player() {
     super();
-    this.role = Role.PLAYER;
   }
 
   public Player(String id, String name, Byte age) {
-    super(id, name, age, Role.PLAYER);
+    super(id, name, age);
   }
 
   public Player(
@@ -31,7 +30,7 @@ public class Player extends TeamMember {
       String description,
       String currentTeamId,
       List<String> previousTeamIds) {
-    super(id, name, age, Role.PLAYER, image, description, currentTeamId, previousTeamIds);
+    super(id, name, age, image, description, currentTeamId, previousTeamIds);
   }
 
   public Player(
@@ -43,6 +42,6 @@ public class Player extends TeamMember {
       String currentTeamId,
       List<String> previousTeamIds,
       String userId) {
-    super(id, name, age, Role.PLAYER, image, description, currentTeamId, previousTeamIds, userId);
+    super(id, name, age, image, description, currentTeamId, previousTeamIds, userId);
   }
 }

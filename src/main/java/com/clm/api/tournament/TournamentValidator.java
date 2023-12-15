@@ -10,13 +10,23 @@ public class TournamentValidator implements ConstraintValidator<ValidTournament,
   @Override
   public boolean isValid(Tournament value, ConstraintValidatorContext context) {
     if (value == null) {
-      addConstraintViolation(context, "Match cannot be null");
+      addConstraintViolation(context, "Tournament cannot be null");
       return false;
     }
 
-    // If the match is private, it must be view only and user cannot register to it
     if (value.getVisibility() == Visibility.PRIVATE && !value.isViewOnly()) {
       addConstraintViolation(context, "Private matches must be view only");
+      return false;
+    }
+
+    if (value.getMinTeams() > value.getMaxTeams()) {
+      addConstraintViolation(context, "Min teams cannot be greater than max teams");
+      return false;
+    }
+
+    if (value.getMinPlayersPerTeam() > value.getMaxPlayersPerTeam()) {
+      addConstraintViolation(
+          context, "Min players per team cannot be greater than max players per team");
       return false;
     }
 

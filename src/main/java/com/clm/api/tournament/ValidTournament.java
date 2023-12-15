@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = TournamentValidator.class)
 public @interface ValidTournament {
-  String message() default "Match is invalid";
+  String message() default "Tournament is invalid";
 
   Class<?>[] groups() default {};
 

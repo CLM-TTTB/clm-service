@@ -1,4 +1,4 @@
-package com.clm.api.player;
+package com.clm.api.team.member.player;
 
 import com.clm.api.interfaces.IEventTracker;
 import java.time.Instant;

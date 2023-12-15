@@ -2,7 +2,9 @@ package com.clm.api.constants;
 
 /** WhiteListUrl */
 public class WhiteListUrl {
-  public static final String[] GET_METHODS = {};
+  public static final String[] GET_METHODS = {
+    "/v1/tournaments/**",
+  };
 
   public static final String[] POST_METHODS = {};
 

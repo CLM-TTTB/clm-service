@@ -28,4 +28,6 @@ public class ErrorMessage {
   public static final String AGE_INVALID = "Age is invalid, must be at least 6";
 
   public static final String AGE_GROUP_INVALID = "Age group is invalid";
+  public static final String TEAM_MEMBER_LIST_EMPTY = "Team member list is empty";
+  public static final String UNIFORM_LIST_EMPTY = "Uniform list is empty";
 }
