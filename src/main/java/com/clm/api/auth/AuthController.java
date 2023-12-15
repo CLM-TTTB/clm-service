@@ -2,11 +2,14 @@ package com.clm.api.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
+  private final EmailVerificationService emailVerificationService;
 
   /**
    * Register a new account with the given role.
@@ -49,5 +53,11 @@ public class AuthController {
   @PostMapping("/refresh-token")
   public ResponseEntity<?> refreshToken(HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(authService.refreshToken(request));
+  }
+
+  @GetMapping("/two-step-verification/email")
+  public ResponseEntity<?> verifyEmailVerificationLink(
+      @RequestParam("token") String token, @RequestParam("email") String email) {
+    return ResponseEntity.ok(emailVerificationService.verify(email, Map.of("token", token)));
   }
 }

@@ -1,4 +1,4 @@
-package com.clm.api.otp;
+package com.clm.api.auth;
 
 import java.util.Map;
 

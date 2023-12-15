@@ -28,5 +28,6 @@ public class WhiteListUrl {
     "/v2/api-docs",
     "/v3/api-docs",
     "/v3/api-docs/**",
+    "/favicon.ico",
   };
 }

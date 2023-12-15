@@ -46,19 +46,19 @@ public class JwtService {
     return claimsResolver.apply(claims);
   }
 
-  public String generateToken(String username) {
-    return generateToken(new HashMap<>(), username);
+  public String generateAccessToken(String username) {
+    return generateAccessToken(new HashMap<>(), username);
   }
 
-  public String generateToken(UserDetails userDetails) {
-    return generateToken(new HashMap<>(), userDetails);
+  public String generateAccessToken(UserDetails userDetails) {
+    return generateAccessToken(new HashMap<>(), userDetails);
   }
 
-  public String generateToken(Map<String, Object> extraClaims, String username) {
+  public String generateAccessToken(Map<String, Object> extraClaims, String username) {
     return buildToken(extraClaims, username, ACCESS_TOKEN_EXPIRATION);
   }
 
-  public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+  public String generateAccessToken(Map<String, Object> extraClaims, UserDetails userDetails) {
     return buildToken(extraClaims, userDetails, ACCESS_TOKEN_EXPIRATION);
   }
 
@@ -91,19 +91,28 @@ public class JwtService {
         new Date(System.currentTimeMillis() + expirationMsFromNow));
   }
 
-  private String buildToken(
-      Map<String, Object> extraClaims, String username, long expirationMsFromNow) {
+  public String buildToken(String subject, long expirationMsFromNow) {
     return buildToken(
-        extraClaims, username, new Date(System.currentTimeMillis() + expirationMsFromNow));
+        new HashMap<>(), subject, new Date(System.currentTimeMillis() + expirationMsFromNow));
   }
 
-  private String buildToken(Map<String, Object> extraClaims, String username, Date expiration) {
+  public String buildToken(String subject, Date expiration) {
+    return buildToken(new HashMap<>(), subject, expiration);
+  }
+
+  public String buildToken(
+      Map<String, Object> extraClaims, String subject, long expirationMsFromNow) {
+    return buildToken(
+        extraClaims, subject, new Date(System.currentTimeMillis() + expirationMsFromNow));
+  }
+
+  public String buildToken(Map<String, Object> extraClaims, String subject, Date expiration) {
     if (expiration.before(new Date())) {
       throw new IllegalArgumentException("Expiration date must be in the future");
     }
     return Jwts.builder()
         .claims(extraClaims)
-        .subject(username)
+        .subject(subject)
         .issuedAt(new Date(System.currentTimeMillis()))
         .expiration(expiration)
         .signWith(getSignInKey(), Jwts.SIG.HS256)

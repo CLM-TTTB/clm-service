@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jsonwebtoken.lang.Collections;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.Instant;
 import java.util.Collection;
@@ -52,6 +53,8 @@ public class User implements UserDetails {
   @Pattern(regexp = Regex.PASSWORD, message = ErrorMessage.PASSWORD_REQUIRED)
   @JsonIgnore
   private String password;
+
+  @NotNull @JsonIgnore private EmailVerificationToken emailVerificationToken;
 
   @lombok.Builder.Default private String name = "User" + System.currentTimeMillis();
 

@@ -9,6 +9,7 @@ import com.clm.api.security.JwtService;
 import com.clm.api.security.RefreshToken;
 import com.clm.api.security.RefreshTokenRepository;
 import com.clm.api.security.TokenType;
+import com.clm.api.user.EmailVerificationToken;
 import com.clm.api.user.Role;
 import com.clm.api.user.RoleRepository;
 import com.clm.api.user.RoleType;
@@ -17,9 +18,12 @@ import com.clm.api.user.UserRepository;
 import com.clm.api.utils.HttpHeaderHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -39,6 +43,10 @@ public class AuthServiceImpl implements AuthService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final RoleRepository roleRepository;
   private final UserRepository userRepository;
+  private final EmailVerificationService emailVerificationService;
+
+  @Value("${email.verification-expiration}")
+  private long EMAIL_VERIFICATION_EXPIRATION;
 
   @Transactional
   public RefreshTokenResponse refreshToken(HttpServletRequest request)
@@ -59,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
       throw new TokenRefreshException(ErrorMessage.REFRESH_TOKEN_REVOKED);
     }
 
-    String newAccessToken = jwtService.generateToken(savedRefreshToken.getUsername());
+    String newAccessToken = jwtService.generateAccessToken(savedRefreshToken.getUsername());
     RefreshToken updatedRefreshToken = refreshTokenRepository.save(savedRefreshToken.updateToken());
 
     return new RefreshTokenResponse(newAccessToken, updatedRefreshToken.getToken());
@@ -76,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     User user = (User) authentication.getPrincipal();
 
-    String jwtToken = jwtService.generateToken(user);
+    String jwtToken = jwtService.generateAccessToken(user);
     RefreshToken refreshToken = refreshTokenRepository.save(jwtService.generateRefreshToken(user));
 
     return LoginResponse.builder()
@@ -100,22 +108,36 @@ public class AuthServiceImpl implements AuthService {
     if (userRepository.existsByEmail(request.getEmail()))
       throw new AlreadyExistsException("Email already exists");
 
+    EmailVerificationToken emailVerificationToken =
+        new EmailVerificationToken(EMAIL_VERIFICATION_EXPIRATION);
+
     User newUser =
         User.builder()
             .email(request.getEmail())
             .password(passwordEncoder.encode(request.getPassword()))
             .name(request.getName())
             .roles(getRegisteredRoles(roles))
+            .emailVerificationToken(emailVerificationToken)
             .build();
 
     if (createUserInfo != null) {
       if (createUserInfo.apply(newUser)) {
-        userRepository.save(newUser);
-        return true;
+        return saveAndSendVerificationEmail(newUser, emailVerificationToken);
       }
       throw new RuntimeException("Registration failed");
     }
-    return userRepository.save(newUser) != null;
+    return saveAndSendVerificationEmail(newUser, emailVerificationToken);
+  }
+
+  private boolean saveAndSendVerificationEmail(User user, EmailVerificationToken token) {
+    User savedNewUser = userRepository.save(user);
+    String verificationLink =
+        emailVerificationService.generateVerificationLink(savedNewUser.getEmail(), token);
+
+    Map<String, Object> props = new HashMap<>();
+    props.put("subject", "Verification Champion League Management Account");
+    props.put("body", "Please click the link below to verify your account " + verificationLink);
+    return emailVerificationService.send(savedNewUser.getEmail(), props);
   }
 
   /**

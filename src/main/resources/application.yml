@@ -5,6 +5,9 @@ spring:
       uri: mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_CLUSTER}.1syajun.mongodb.net/?retryWrites=true&w=majority
 
 clm:
+  url: ${CLM_URL:http://localhost:8080}
+  api:
+    url: ${CLM_API_URL:http://localhost:8080}
   jwt:
     secret-key: 711a92992d40a1cc0bf64ab3837050ef3dfc26aa42a9623383e67ba72ba788dd
     access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:300000}
@@ -19,3 +22,4 @@ email:
   port: ${EMAIL_PORT:587}
   username: ${EMAIL_USERNAME:champsmanagement03@gmail.com}
   password: ${EMAIL_PASSWORD:keongqikngzilclv}
+  verification-expiration: ${EMAIL_VERIFICATION_EXPIRATION:86400000}
