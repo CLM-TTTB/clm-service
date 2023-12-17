@@ -1,5 +1,6 @@
 package com.clm.api.tournament;
 
+import com.clm.api.team.Team;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import org.springframework.http.HttpStatus;
@@ -30,5 +31,11 @@ public class TournamentController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getTournamentById(@PathVariable("id") String id) {
     return ResponseEntity.ok(tournamentService.get(id));
+  }
+
+  @PostMapping("/{id}/teams")
+  public ResponseEntity<?> addTeamToTournament(
+      @PathVariable("id") String id, @Valid @RequestBody Team team, Principal connectedUser) {
+    return ResponseEntity.ok(tournamentService.addTeam(id, team, connectedUser));
   }
 }

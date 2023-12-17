@@ -21,23 +21,25 @@ public class TeamTemplate {
 
   @Transient private static final long serialVersionUID = 1L;
 
-  @Id protected String id;
+  @Id private String id;
 
-  protected String creatorId;
+  private String creatorId;
 
-  @NotBlank protected String name;
+  @NotBlank private String name;
+
+  @NotBlank private String teamName;
 
   @Pattern(regexp = Regex.PHONE_NUMBER, message = ErrorMessage.PHONE_NUMBER_INVALID)
   @NotBlank
-  protected String phoneNo;
+  private String phoneNo;
 
-  @lombok.Builder.Default protected String image = "";
-  @lombok.Builder.Default protected String description = "";
+  @lombok.Builder.Default private String image = "";
+  @lombok.Builder.Default private String description = "";
 
-  @NotNull protected List<TeamMember> members;
+  @NotNull private List<TeamMember> members;
 
   // Save the list of uniform images url
-  protected List<String> uniforms;
+  private List<String> uniforms;
 
   public TeamTemplate() {
     this.image = "";
@@ -46,7 +48,7 @@ public class TeamTemplate {
 
   public TeamTemplate(Team team) {
     this.creatorId = team.getCreatorId();
-    this.name = team.getName();
+    this.teamName = team.getName();
     this.phoneNo = team.getPhoneNo();
     this.image = team.getImage();
     this.description = team.getDescription();
