@@ -7,6 +7,7 @@ import com.clm.api.tournament.TournamentRepository;
 import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
 import java.security.Principal;
+import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,14 @@ public class TeamServiceImpl implements TeamService {
   public Team update(Team t, Principal connectedUser) {
     teamRepository.findById(t.getId()).orElseThrow(() -> new NotFoundException("Team not found"));
     return teamRepository.save(t);
+  }
+
+  @Override
+  public Team patch(
+      Map<String, Object> identifyFields,
+      Map<String, Object> updateFields,
+      Principal connectedUser) {
+    throw new UnsupportedOperationException("Unimplemented method 'patch'");
   }
 
   @Override

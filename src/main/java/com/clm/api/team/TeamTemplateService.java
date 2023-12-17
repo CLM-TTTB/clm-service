@@ -10,4 +10,6 @@ public interface TeamTemplateService extends CRUDService<TeamTemplate, String> {
   TeamTemplate saveFromRegisteredTeam(Team team, Principal connectedUser);
 
   List<String> getAllTeamTemplateNames(Principal connectedUser);
+
+  List<TeamTemplate> getAll(Principal connectedUser);
 }

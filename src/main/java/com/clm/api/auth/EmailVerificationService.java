@@ -84,12 +84,13 @@ public class EmailVerificationService implements TwoStepVerificationService {
     String email = Base64Encryption.decodeBetter(identifier);
 
     User user = userRepository.findByEmail(email).orElse(null);
-    if (user == null) {
+    if (user == null || user.getEmailVerificationToken() == null) {
       return false;
     }
 
     if (user.getEmailVerificationToken().isValid(token)) {
       user.setStatus(User.Status.ACTIVE);
+      user.setEmailVerificationToken(null);
       return userRepository.save(user) != null;
     }
     return false;

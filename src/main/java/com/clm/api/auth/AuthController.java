@@ -28,9 +28,7 @@ public class AuthController {
    */
   @PostMapping("/register")
   public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
-    return authService.register(request)
-        ? ResponseEntity.status(HttpStatus.CREATED).build()
-        : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
   }
 
   /**
@@ -59,5 +57,10 @@ public class AuthController {
   public ResponseEntity<?> verifyEmailVerificationLink(
       @RequestParam("token") String token, @RequestParam("email") String email) {
     return ResponseEntity.ok(emailVerificationService.verify(email, Map.of("token", token)));
+  }
+
+  @PostMapping("/two-step-verification/email")
+  public ResponseEntity<?> resendEmailVerification(HttpServletRequest request) {
+    return ResponseEntity.ok(authService.resendVerificationEmail(request));
   }
 }

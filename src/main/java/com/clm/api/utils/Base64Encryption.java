@@ -33,8 +33,13 @@ public class Base64Encryption {
    * @return The modified and encoded string.
    */
   public static String encodeBetter(String str) {
-    String secretKeyRandom = randomNumOrChar((int) (Math.random() * 9));
+    return encodeBetter(str, 9);
+  }
+
+  public static String encodeBetter(String str, int maxSecretKeyLength) {
+    String secretKeyRandom = randomNumOrChar((int) (Math.random() * (maxSecretKeyLength - 1) + 1));
     int secretKeyLength = secretKeyRandom.length();
+    int numOfCharOfSecretKeyLength = String.valueOf(secretKeyLength).length();
 
     String encodedString = encode(str);
 
@@ -50,7 +55,8 @@ public class Base64Encryption {
         insertString(encodedString, insertIndex, secretKeyRandom)
             + insertIndex
             + secretKeyLength
-            + insertIndexLength;
+            + insertIndexLength
+            + numOfCharOfSecretKeyLength;
 
     return encodedString;
   }
@@ -63,15 +69,22 @@ public class Base64Encryption {
    */
   public static String decodeBetter(String str) {
     int length = str.length();
-    int insertIndexLength = Integer.parseInt(str.substring(length - 1));
-    int secretKeyLength = Integer.parseInt(str.substring(length - 1 - 1, length - 1));
+    int numOfCharOfSecretKeyLength = Integer.parseInt(str.substring(length - 1));
+    int insertIndexLength = Integer.parseInt(str.substring(length - 1 - 1, length - 1));
+    int secretKeyLength =
+        Integer.parseInt(
+            str.substring(length - 1 - 1 - numOfCharOfSecretKeyLength, length - 1 - 1));
     int insertIndex =
-        Integer.parseInt(str.substring(length - 1 - 1 - insertIndexLength, length - 1 - 1));
+        Integer.parseInt(
+            str.substring(
+                length - 1 - 1 - numOfCharOfSecretKeyLength - insertIndexLength,
+                length - 1 - 1 - numOfCharOfSecretKeyLength));
 
     String encodedString =
         str.substring(0, insertIndex)
-            + str.substring(insertIndex + secretKeyLength, length - 1 - 1 - insertIndexLength);
-
+            + str.substring(
+                insertIndex + secretKeyLength,
+                length - 1 - 1 - numOfCharOfSecretKeyLength - insertIndexLength);
     return decode(encodedString);
   }
 

@@ -15,6 +15,7 @@ import com.clm.api.user.RoleRepository;
 import com.clm.api.user.RoleType;
 import com.clm.api.user.User;
 import com.clm.api.user.UserRepository;
+import com.clm.api.utils.Base64Encryption;
 import com.clm.api.utils.HttpHeaderHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 @lombok.RequiredArgsConstructor
 @Service
@@ -97,47 +99,74 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public boolean register(RegisterRequest request) {
+  public ResendEmailVerificationResponse register(RegisterRequest request) {
     return register(request, request.getRoles(), null);
   }
 
   @Transactional(rollbackFor = Exception.class)
-  private boolean register(
+  private ResendEmailVerificationResponse register(
       RegisterRequest request, Set<Role> roles, Function<User, Boolean> createUserInfo)
       throws AlreadyExistsException, NotFoundException {
     if (userRepository.existsByEmail(request.getEmail()))
       throw new AlreadyExistsException("Email already exists");
-
-    EmailVerificationToken emailVerificationToken =
-        new EmailVerificationToken(EMAIL_VERIFICATION_EXPIRATION);
-
     User newUser =
         User.builder()
             .email(request.getEmail())
             .password(passwordEncoder.encode(request.getPassword()))
             .name(request.getName())
             .roles(getRegisteredRoles(roles))
-            .emailVerificationToken(emailVerificationToken)
             .build();
 
     if (createUserInfo != null) {
       if (createUserInfo.apply(newUser)) {
-        return saveAndSendVerificationEmail(newUser, emailVerificationToken);
+        return new ResendEmailVerificationResponse(saveAndSendVerificationEmail(newUser));
       }
       throw new RuntimeException("Registration failed");
     }
-    return saveAndSendVerificationEmail(newUser, emailVerificationToken);
+
+    return new ResendEmailVerificationResponse(saveAndSendVerificationEmail(newUser));
   }
 
-  private boolean saveAndSendVerificationEmail(User user, EmailVerificationToken token) {
+  @Override
+  public ResendEmailVerificationResponse resendVerificationEmail(HttpServletRequest request)
+      throws NotFoundException, AlreadyExistsException {
+    String resendEmailVerificationToken = HttpHeaderHelper.getBearerToken(request);
+    String email = Base64Encryption.decodeBetter(UriEncoder.decode(resendEmailVerificationToken));
+    User user =
+        userRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+    if (user.getStatus() == User.Status.ACTIVE) {
+      user.setEmailVerificationToken(null);
+      throw new AlreadyExistsException("Email already verified");
+    }
+    if (user.getEmailVerificationToken() == null) {
+      throw new NotFoundException("Token expired");
+    }
+
+    if (user.getEmailVerificationToken().getResendToken().equals(resendEmailVerificationToken)) {
+      return new ResendEmailVerificationResponse(saveAndSendVerificationEmail(user));
+    } else {
+      throw new NotFoundException("Invalid token");
+    }
+  }
+
+  private String saveAndSendVerificationEmail(User user) {
+    EmailVerificationToken emailVerificationToken =
+        new EmailVerificationToken(EMAIL_VERIFICATION_EXPIRATION, user.getEmail());
+    user.setEmailVerificationToken(emailVerificationToken);
     User savedNewUser = userRepository.save(user);
+
     String verificationLink =
-        emailVerificationService.generateVerificationLink(savedNewUser.getEmail(), token);
+        emailVerificationService.generateVerificationLink(
+            savedNewUser.getEmail(), emailVerificationToken);
 
     Map<String, Object> props = new HashMap<>();
     props.put("subject", "Verification Champion League Management Account");
     props.put("body", "Please click the link below to verify your account " + verificationLink);
-    return emailVerificationService.send(savedNewUser.getEmail(), props);
+    return emailVerificationService.send(savedNewUser.getEmail(), props)
+        ? emailVerificationToken.getResendToken()
+        : null;
   }
 
   /**

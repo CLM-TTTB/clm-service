@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 public interface TeamTemplateRepository extends MongoRepository<TeamTemplate, String> {
   Optional<TeamTemplate> findByNameAndCreatorId(String name, String creatorId);
 
-  Optional<List<TeamTemplate>> findByCreatorId(String creatorId);
+  Optional<TeamTemplate> findByIdAndCreatorId(String id, String creatorId);
+
+  List<TeamTemplate> findByCreatorId(String creatorId);
 
   boolean existsByNameAndCreatorId(String name, String creatorId);
 

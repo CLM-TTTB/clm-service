@@ -13,6 +13,7 @@ import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,15 @@ public class TournamentServiceImpl implements TournamentService {
         .findById(tournament.getId())
         .orElseThrow(() -> new NotFoundException("Tournament not found"));
     return tournamentRepository.save(tournament);
+  }
+
+  @Override
+  public Tournament patch(
+      Map<String, Object> identifyFields,
+      Map<String, Object> updateFields,
+      Principal connectedUser) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'patch'");
   }
 
   @Override

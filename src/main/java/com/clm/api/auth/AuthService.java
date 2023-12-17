@@ -38,5 +38,18 @@ public interface AuthService {
    * @throws AlreadyExistsException if the user already exists.
    * @throws NotFoundException if a required resource cannot be found.
    */
-  boolean register(RegisterRequest request) throws AlreadyExistsException, NotFoundException;
+  ResendEmailVerificationResponse register(RegisterRequest request)
+      throws AlreadyExistsException, NotFoundException;
+
+  /**
+   * Resends the email verification email to the user with the given email address.
+   *
+   * @param request DTO containing the email address of the user to resend the verification email
+   *     to.
+   * @return boolean true if the email was successfully sent.
+   * @throws NotFoundException if the user cannot be found.
+   * @throws AlreadyExistsException if the user has already been verified.
+   */
+  ResendEmailVerificationResponse resendVerificationEmail(HttpServletRequest request)
+      throws NotFoundException, AlreadyExistsException;
 }
