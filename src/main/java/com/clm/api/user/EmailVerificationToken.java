@@ -59,7 +59,7 @@ public class EmailVerificationToken {
   }
 
   private String generateResendToken(String email) {
-    resendToken = UriEncoder.encode(Base64Encryption.encodeBetter(email, 100));
+    resendToken = UriEncoder.encode(Base64Encryption.encodeBetter(email, 15));
     return resendToken;
   }
 }
