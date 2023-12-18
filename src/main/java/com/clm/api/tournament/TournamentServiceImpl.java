@@ -11,12 +11,15 @@ import com.clm.api.team.TeamRepository;
 import com.clm.api.team.TeamService;
 import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
+import com.clm.api.utils.ValidationHelper;
+import java.lang.reflect.Field;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ReflectionUtils;
 
 @Service
 @lombok.RequiredArgsConstructor
@@ -53,9 +56,40 @@ public class TournamentServiceImpl implements TournamentService {
   public Tournament patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
+      String[] ignoreFields,
       Principal connectedUser) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'patch'");
+    if (updateFields == null || updateFields.isEmpty()) {
+      throw new IllegalArgumentException("No field to update");
+    }
+
+    if (identifyFields.containsKey("id")) {
+      User user = PrincipalHelper.getUser(connectedUser);
+      Tournament tournament =
+          tournamentRepository
+              .findByIdAndCreatorId((String) identifyFields.get("id"), user.getId())
+              .orElseThrow(() -> new NotFoundException("Tournament not found"));
+
+      if (tournament.getStatus() == Tournament.Status.ONGOING
+          || tournament.getStatus() == Tournament.Status.FINISHED) {
+        throw new InvalidException("Cannot update an ongoing or a finished tournament");
+      }
+
+      for (String ignoreField : ignoreFields) {
+        updateFields.remove(ignoreField);
+      }
+
+      updateFields.forEach(
+          (k, v) -> {
+            Field field = ReflectionUtils.findField(tournament.getClass(), k);
+            field.setAccessible(true);
+            ReflectionUtils.setField(field, tournament, v);
+          });
+
+      return tournamentRepository.save(ValidationHelper.validate(tournament));
+
+    } else {
+      throw new IllegalArgumentException("No field to identify the tournament template");
+    }
   }
 
   @Override

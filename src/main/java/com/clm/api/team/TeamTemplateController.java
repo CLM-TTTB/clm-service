@@ -52,6 +52,10 @@ public class TeamTemplateController {
       @RequestBody Map<String, Object> updateFields,
       Principal connectedUser) {
     return ResponseEntity.ok(
-        teamTemplateService.patch(Map.of("id", id), updateFields, connectedUser));
+        teamTemplateService.patch(
+            Map.of("id", id),
+            updateFields,
+            new String[] {"id", "creatorId", "createdAt", "updatedAt"},
+            connectedUser));
   }
 }

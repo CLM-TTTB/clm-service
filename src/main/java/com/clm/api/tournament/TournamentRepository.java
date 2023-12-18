@@ -2,6 +2,7 @@ package com.clm.api.tournament;
 
 import com.clm.api.enums.Visibility;
 import java.time.Instant;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -10,6 +11,10 @@ import org.springframework.stereotype.Repository;
 /** TounamentRepository */
 @Repository
 public interface TournamentRepository extends MongoRepository<Tournament, String> {
+
+  Optional<Tournament> findByIdAndRegistrationDeadlineAfter(String id, Instant now);
+
+  Optional<Tournament> findByIdAndCreatorId(String id, String creatorId);
 
   Page<Tournament> findByVisibilityAndStartTimeAfter(
       Visibility visibility, Instant now, Pageable pageable);

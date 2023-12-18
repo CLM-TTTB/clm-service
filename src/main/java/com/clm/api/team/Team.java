@@ -3,6 +3,8 @@ package com.clm.api.team;
 import com.clm.api.constants.Regex;
 import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.team.member.TeamMember;
+import com.clm.api.team.member.player.Player;
+import com.clm.api.team.member.player.TrackedPlayer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.time.Instant;
@@ -61,7 +63,7 @@ public class Team {
   @lombok.Builder.Default private LinkedList<String> previousGameIds = new LinkedList<>();
 
   public String getPreviousGameId() {
-    if (previousGameIds.isEmpty()) {
+    if (previousGameIds == null || previousGameIds.isEmpty()) {
       return null;
     }
     return previousGameIds.getLast();
@@ -88,6 +90,23 @@ public class Team {
     this.description = teamTemplate.getDescription();
     this.uniforms = teamTemplate.getUniforms();
     this.members = teamTemplate.getMembers();
+    this.status = Status.PENDING;
+    this.uniforms = new ArrayList<>();
+    this.previousGameIds = new LinkedList<>();
+    changePlayerToTrackedPlayer();
+  }
+
+  private void changePlayerToTrackedPlayer() {
+    if (members == null || members.isEmpty()) {
+      return;
+    }
+
+    for (int i = 0; i < members.size(); i++) {
+      TeamMember member = members.get(i);
+      if (member instanceof Player) {
+        members.set(i, new TrackedPlayer((Player) member));
+      }
+    }
   }
 
   public static Team from(TeamTemplate teamTemplate) {

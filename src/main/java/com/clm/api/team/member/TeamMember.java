@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
@@ -22,6 +21,7 @@ import org.springframework.data.annotation.Transient;
     defaultImpl = Player.class)
 @JsonSubTypes({
   @JsonSubTypes.Type(value = Player.class, name = "PLAYER"),
+  // @JsonSubTypes.Type(value = TrackedPlayer.class, name = "TRACKED_PLAYER"),
 })
 public abstract class TeamMember {
   @Transient private static final long serialVersionUID = 1L;
@@ -37,15 +37,20 @@ public abstract class TeamMember {
   @lombok.Builder.Default protected String image = "";
   @lombok.Builder.Default protected String description = "";
 
-  protected String currentTeamId;
-  protected List<String> previousTeamIds;
-
   // NOTE: If the member of a team has the account in the system, the userId will be set.
   protected String userId;
 
   public TeamMember() {
     this.image = "";
     this.description = "";
+  }
+
+  public TeamMember(TeamMember teamMember) {
+    this.name = teamMember.getName();
+    this.age = teamMember.getAge();
+    this.image = teamMember.getImage();
+    this.description = teamMember.getDescription();
+    this.userId = teamMember.getUserId();
   }
 
   public TeamMember(String id, String name, Byte age) {
@@ -56,31 +61,15 @@ public abstract class TeamMember {
     this.description = "";
   }
 
-  public TeamMember(
-      String id,
-      String name,
-      Byte age,
-      String image,
-      String description,
-      String currentTeamId,
-      List<String> previousTeamIds) {
+  public TeamMember(String id, String name, Byte age, String image, String description) {
     this(id, name, age);
     this.image = image;
     this.description = description;
-    this.currentTeamId = currentTeamId;
-    this.previousTeamIds = previousTeamIds;
   }
 
   public TeamMember(
-      String id,
-      String name,
-      Byte age,
-      String image,
-      String description,
-      String currentTeamId,
-      List<String> previousTeamIds,
-      String userId) {
-    this(id, name, age, image, description, currentTeamId, previousTeamIds);
+      String id, String name, Byte age, String image, String description, String userId) {
+    this(id, name, age, image, description);
     this.userId = userId;
   }
 }

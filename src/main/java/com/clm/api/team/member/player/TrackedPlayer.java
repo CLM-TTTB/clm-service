@@ -49,6 +49,24 @@ public class TrackedPlayer extends Player implements ICard {
     redCards.add(CardFactory.createRedCard(gameId));
   }
 
+  public TrackedPlayer() {
+    super();
+    this.yellowCards = new LinkedList<>();
+    this.redCards = new LinkedList<>();
+  }
+
+  public TrackedPlayer(TrackedPlayer player) {
+    super(player);
+    this.yellowCards = new LinkedList<>();
+    this.redCards = new LinkedList<>();
+  }
+
+  public TrackedPlayer(Player player) {
+    super(player);
+    this.yellowCards = new LinkedList<>();
+    this.redCards = new LinkedList<>();
+  }
+
   /**
    * Checks if the player is suspended for the this game
    *

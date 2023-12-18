@@ -5,9 +5,12 @@ import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.team.member.TeamMember;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -40,6 +43,9 @@ public class TeamTemplate {
 
   // Save the list of uniform images url
   @lombok.Builder.Default private List<String> uniforms = new ArrayList<>();
+
+  @CreatedDate @lombok.Builder.Default private Instant createdAt = Instant.now();
+  @LastModifiedDate @lombok.Builder.Default private Instant updatedAt = Instant.now();
 
   public TeamTemplate() {
     this.image = "";

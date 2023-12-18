@@ -4,12 +4,14 @@ import com.clm.api.enums.Visibility;
 import com.clm.api.team.Team;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +43,27 @@ public class TournamentController {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(tournamentService.create(tournament, connectedUser));
+  }
+
+  @PatchMapping("/{id}")
+  public ResponseEntity<?> updateTournament(
+      @PathVariable("id") String id,
+      @RequestBody Map<String, Object> updateFields,
+      Principal connectedUser) {
+
+    return ResponseEntity.ok(
+        tournamentService.patch(
+            Map.of("id", id),
+            updateFields,
+            new String[] {
+              "id",
+              "creatorId",
+              "totalEnrolledTeams",
+              "totalAcceptedTeams",
+              "createdAt",
+              "updatedAt"
+            },
+            connectedUser));
   }
 
   @GetMapping("/{id}")

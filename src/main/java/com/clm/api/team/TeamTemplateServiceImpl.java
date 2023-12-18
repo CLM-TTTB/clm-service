@@ -3,8 +3,12 @@ package com.clm.api.team;
 import com.clm.api.exceptions.business.AlreadyExistsException;
 import com.clm.api.exceptions.business.InvalidException;
 import com.clm.api.exceptions.business.NotFoundException;
+import com.clm.api.team.member.TeamMember;
 import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
+import com.clm.api.utils.ValidationHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import java.lang.reflect.Field;
 import java.security.Principal;
 import java.util.List;
@@ -18,6 +22,7 @@ import org.springframework.util.ReflectionUtils;
 @Service
 @lombok.RequiredArgsConstructor
 public class TeamTemplateServiceImpl implements TeamTemplateService {
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private final TeamTemplateRepository teamTemplateRepository;
 
@@ -51,14 +56,17 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
   }
 
   @Override
+  @Transactional
   public TeamTemplate update(TeamTemplate t, Principal connectedUser) {
     return teamTemplateRepository.save(t);
   }
 
   @Override
+  @Transactional
   public TeamTemplate patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
+      String[] ignoreFields,
       Principal connectedUser) {
     if (updateFields == null || updateFields.isEmpty()) {
       throw new IllegalArgumentException("No field to update");
@@ -71,8 +79,9 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
               .findByIdAndCreatorId((String) identifyFields.get("id"), user.getId())
               .orElseThrow(() -> new NotFoundException("Team template not found"));
 
-      updateFields.remove("id");
-      updateFields.remove("creatorId");
+      for (String ignoreField : ignoreFields) {
+        updateFields.remove(ignoreField);
+      }
 
       if (updateFields.containsKey("name")
           && teamTemplateRepository.existsByNameAndCreatorId(
@@ -85,10 +94,19 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
           (k, v) -> {
             Field field = ReflectionUtils.findField(template.getClass(), k);
             field.setAccessible(true);
-            ReflectionUtils.setField(field, template, v);
+            if (k.equals("members") && v instanceof List) {
+              CollectionType type =
+                  objectMapper
+                      .getTypeFactory()
+                      .constructCollectionType(List.class, TeamMember.class);
+              List<TeamMember> members = objectMapper.convertValue(v, type);
+              ReflectionUtils.setField(field, template, members);
+            } else {
+              ReflectionUtils.setField(field, template, v);
+            }
           });
 
-      return teamTemplateRepository.save(template);
+      return teamTemplateRepository.save(ValidationHelper.validate(template));
 
     } else {
       throw new IllegalArgumentException("No field to identify the team template");

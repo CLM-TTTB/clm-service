@@ -1,21 +1,31 @@
 package com.clm.api.team;
 
+import com.clm.api.exceptions.business.InvalidException;
 import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.response.PageResponse;
 import com.clm.api.team.Team.Status;
+import com.clm.api.team.member.TeamMember;
+import com.clm.api.tournament.Tournament;
 import com.clm.api.tournament.TournamentRepository;
 import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
+import com.clm.api.utils.ValidationHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import java.lang.reflect.Field;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ReflectionUtils;
 
 /** TeamServiceImpl */
 @Service
 @lombok.RequiredArgsConstructor
 public class TeamServiceImpl implements TeamService {
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private final TeamRepository teamRepository;
   private final TeamTemplateRepository teamTemplateRepository;
@@ -41,11 +51,57 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
+  @Transactional
   public Team patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
+      String[] ignoreFields,
       Principal connectedUser) {
-    throw new UnsupportedOperationException("Unimplemented method 'patch'");
+    if (updateFields == null || updateFields.isEmpty()) {
+      throw new IllegalArgumentException("No field to update");
+    }
+
+    if (identifyFields.containsKey("id")) {
+      User user = PrincipalHelper.getUser(connectedUser);
+      Team team =
+          teamRepository
+              .findByIdAndCreatorId((String) identifyFields.get("id"), user.getId())
+              .orElseThrow(() -> new NotFoundException("Team not found"));
+      Tournament tournament =
+          tournamentRepository
+              .findById(team.getTournamentId())
+              .orElseThrow(
+                  () -> new NotFoundException("Team is not registered for this tournament"));
+
+      if (!tournament.isEnrollmentOpen()) {
+        throw new InvalidException("Tournament enrollment is closed, cannot update team");
+      }
+
+      for (String ignoreField : ignoreFields) {
+        updateFields.remove(ignoreField);
+      }
+
+      updateFields.forEach(
+          (k, v) -> {
+            Field field = ReflectionUtils.findField(team.getClass(), k);
+            field.setAccessible(true);
+            if (k.equals("members") && v instanceof List) {
+              CollectionType type =
+                  objectMapper
+                      .getTypeFactory()
+                      .constructCollectionType(List.class, TeamMember.class);
+              List<TeamMember> members = objectMapper.convertValue(v, type);
+              ReflectionUtils.setField(field, team, members);
+            } else {
+              ReflectionUtils.setField(field, team, v);
+            }
+          });
+
+      return teamRepository.save(ValidationHelper.validate(team));
+
+    } else {
+      throw new IllegalArgumentException("No field to identify the team template");
+    }
   }
 
   @Override
@@ -61,6 +117,7 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
+  @Transactional
   public Team createFromTemplate(String name, Principal connectedUser) {
     User user = PrincipalHelper.getUser(connectedUser);
 
