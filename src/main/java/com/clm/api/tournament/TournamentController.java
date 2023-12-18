@@ -27,7 +27,7 @@ public class TournamentController {
 
   @GetMapping("")
   public ResponseEntity<?> getTournaments(
-      @PageableDefault(page = 0, size = 9, sort = "startTime", direction = Direction.ASC)
+      @PageableDefault(page = 0, size = 9, sort = "startTime", direction = Direction.DESC)
           Pageable pageable,
       @RequestParam(defaultValue = "PUBLISH") Visibility visibility,
       @RequestParam(required = false) Tournament.Status status) {

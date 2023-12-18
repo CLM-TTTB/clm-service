@@ -25,7 +25,7 @@ public class TournamentServiceImpl implements TournamentService {
   private final TeamRepository teamRepository;
 
   @Override
-  public Tournament get(String id) {
+  public Tournament get(String id) throws NotFoundException {
     return tournamentRepository
         .findById(id)
         .orElseThrow(() -> new NotFoundException("Tournament with id " + id + " not found"));
@@ -51,6 +51,63 @@ public class TournamentServiceImpl implements TournamentService {
   @Override
   public void delete(String id, Principal connectedUser) {
     tournamentRepository.deleteById(id);
+  }
+
+  @Override
+  public PageResponse<Tournament> getAllByCreatorId(
+      Visibility visibility,
+      Tournament.Status tournamentStatus,
+      Principal principal,
+      Pageable pageable) {
+    User user = PrincipalHelper.getUser(principal);
+    if (visibility == null && tournamentStatus == null) {
+      return new PageResponse<>(tournamentRepository.findByCreatorId(user.getId(), pageable));
+    } else if (tournamentStatus == null) {
+      return new PageResponse<>(
+          tournamentRepository.findByCreatorIdAndVisibility(user.getId(), visibility, pageable));
+    }
+    if (visibility == null) {
+      switch (tournamentStatus) {
+        case ONGOING:
+          return new PageResponse<>(
+              tournamentRepository.findByCreatorIdAndStartTimeBeforeAndEndTimeAfter(
+                  user.getId(), Instant.now(), Instant.now(), pageable));
+        case CANCELLED:
+          return new PageResponse<>(
+              tournamentRepository.findByCreatorIdAndCancelled(user.getId(), true, pageable));
+        case UPCOMING:
+          return new PageResponse<>(
+              tournamentRepository.findByCreatorIdAndStartTimeAfter(
+                  user.getId(), Instant.now(), pageable));
+        case FINISHED:
+          return new PageResponse<>(
+              tournamentRepository.findByCreatorIdAndEndTimeBefore(
+                  user.getId(), Instant.now(), pageable));
+        default:
+          throw new IllegalArgumentException("Invalid tournament status");
+      }
+    }
+
+    switch (tournamentStatus) {
+      case ONGOING:
+        return new PageResponse<>(
+            tournamentRepository.findByCreatorIdAndVisibilityAndStartTimeBeforeAndEndTimeAfter(
+                user.getId(), visibility, Instant.now(), Instant.now(), pageable));
+      case CANCELLED:
+        return new PageResponse<>(
+            tournamentRepository.findByCreatorIdAndVisibilityAndCancelled(
+                user.getId(), visibility, true, pageable));
+      case UPCOMING:
+        return new PageResponse<>(
+            tournamentRepository.findByCreatorIdAndVisibilityAndStartTimeAfter(
+                user.getId(), visibility, Instant.now(), pageable));
+      case FINISHED:
+        return new PageResponse<>(
+            tournamentRepository.findByCreatorIdAndVisibilityAndEndTimeBefore(
+                user.getId(), visibility, Instant.now(), pageable));
+      default:
+        throw new IllegalArgumentException("Invalid tournament status");
+    }
   }
 
   @Override

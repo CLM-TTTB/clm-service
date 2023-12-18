@@ -12,4 +12,6 @@ public interface TeamService extends CRUDService<Team, String> {
   Team createFromTemplate(String name, Principal connectedUser);
 
   PageResponse<Team> getAll(String tournamentId, Status status, Pageable pageable);
+
+  PageResponse<Team> getAllByCreator(Status status, Principal principal, Pageable pageable);
 }

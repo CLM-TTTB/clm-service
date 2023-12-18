@@ -17,6 +17,12 @@ public interface TournamentService extends CRUDService<Tournament, String> {
   PageResponse<Tournament> getAll(
       Visibility visibility, Tournament.Status tournamentStatus, Pageable pageable);
 
+  PageResponse<Tournament> getAllByCreatorId(
+      Visibility visibility,
+      Tournament.Status tournamentStatus,
+      Principal principal,
+      Pageable pageable);
+
   Team addTeam(String tournamentId, Team team, Principal connectedUser)
       throws TeamRegistrationFailedException;
 

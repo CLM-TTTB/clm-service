@@ -24,6 +24,12 @@ public interface TeamRepository extends MongoRepository<Team, String> {
 
   Page<Team> findByCreatorIdAndStatus(String creatorId, Team.Status status, Pageable pageable);
 
+  Page<Team> findByTournamentIdAndCreatorIdAndStatus(
+      String tournamentId, String creatorId, Team.Status status, Pageable pageable);
+
+  Page<Team> findByTournamentIdAndCreatorId(
+      String tournamentId, String creatorId, Pageable pageable);
+
   boolean existsByTournamentIdAndCreatorId(String tournamentId, String creatorId);
 
   boolean existsByTournamentIdAndName(String tournamentId, String name);

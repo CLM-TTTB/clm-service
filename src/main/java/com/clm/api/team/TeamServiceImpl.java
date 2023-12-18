@@ -21,7 +21,7 @@ public class TeamServiceImpl implements TeamService {
   private final TournamentRepository tournamentRepository;
 
   @Override
-  public Team get(String id) {
+  public Team get(String id) throws NotFoundException {
     return teamRepository.findById(id).orElseThrow(() -> new NotFoundException("Team not found"));
   }
 
@@ -74,5 +74,17 @@ public class TeamServiceImpl implements TeamService {
 
     return new PageResponse<>(
         teamRepository.findByTournamentIdAndStatus(tournamentId, status, pageable));
+  }
+
+  @Override
+  public PageResponse<Team> getAllByCreator(Status status, Principal principal, Pageable pageable) {
+    User user = PrincipalHelper.getUser(principal);
+
+    if (status == null) {
+      return new PageResponse<>(teamRepository.findByCreatorId(user.getId(), pageable));
+    }
+
+    return new PageResponse<>(
+        teamRepository.findByCreatorIdAndStatus(user.getId(), status, pageable));
   }
 }
