@@ -33,8 +33,23 @@ public interface TournamentRepository extends MongoRepository<Tournament, String
   Page<Tournament> findByVisibilityAndCancelled(
       Visibility visibility, Boolean cancelled, Pageable pageable);
 
+  Page<Tournament> findByVisibilityAndNameContainingIgnoreCaseAndCancelled(
+      Visibility visibility, String name, Boolean cancelled, Pageable pageable);
+
   Page<Tournament> findByVisibilityAndNameContainingIgnoreCase(
       Visibility visibility, String name, Pageable pageable);
+
+  Page<Tournament> findByVisibilityAndNameContainingIgnoreCaseAndEndTimeBefore(
+      Visibility visibility, String name, Instant now, Pageable pageable);
+
+  Page<Tournament> findByVisibilityAndNameContainingIgnoreCaseAndStartTimeAfter(
+      Visibility visibility, String name, Instant now, Pageable pageable);
+
+  Page<Tournament> findByVisibilityAndNameContainingIgnoreCaseAndStartTimeBeforeAndEndTimeAfter(
+      Visibility visibility, String name, Instant now1, Instant now2, Pageable pageable);
+
+  Page<Tournament> findByVisibilityAndNameContainingIgnoreCaseAndRegistrationDeadlineAfter(
+      Visibility visibility, String name, Instant now, Pageable pageable);
 
   Page<Tournament> findByCreatorIdAndVisibility(
       String creatorId, Visibility visibility, Pageable pageable);

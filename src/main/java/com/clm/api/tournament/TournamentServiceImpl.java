@@ -273,4 +273,37 @@ public class TournamentServiceImpl implements TournamentService {
     teamRepository.save(team);
     tournamentRepository.save(tournament);
   }
+
+  @Override
+  public PageResponse<Tournament> search(
+      String nameQuery, Tournament.Status status, Pageable pageable) {
+
+    if (status == null) {
+      return new PageResponse<>(
+          tournamentRepository.findByVisibilityAndNameContainingIgnoreCase(
+              Visibility.PUBLISH, nameQuery, pageable));
+    }
+
+    switch (status) {
+      case ONGOING:
+        return new PageResponse<>(
+            tournamentRepository
+                .findByVisibilityAndNameContainingIgnoreCaseAndStartTimeBeforeAndEndTimeAfter(
+                    Visibility.PUBLISH, nameQuery, Instant.now(), Instant.now(), pageable));
+      case CANCELLED:
+        return new PageResponse<>(
+            tournamentRepository.findByVisibilityAndNameContainingIgnoreCaseAndCancelled(
+                Visibility.PUBLISH, nameQuery, true, pageable));
+      case UPCOMING:
+        return new PageResponse<>(
+            tournamentRepository.findByVisibilityAndNameContainingIgnoreCaseAndStartTimeAfter(
+                Visibility.PUBLISH, nameQuery, Instant.now(), pageable));
+      case FINISHED:
+        return new PageResponse<>(
+            tournamentRepository.findByVisibilityAndNameContainingIgnoreCaseAndEndTimeBefore(
+                Visibility.PUBLISH, nameQuery, Instant.now(), pageable));
+      default:
+        throw new IllegalArgumentException("Invalid tournament status");
+    }
+  }
 }

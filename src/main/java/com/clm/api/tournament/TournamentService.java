@@ -31,4 +31,6 @@ public interface TournamentService extends CRUDService<Tournament, String> {
   void handleTeamRegistrationApproval(
       String tournamentId, String teamId, boolean approved, Principal connectedUser)
       throws NotFoundException, InvalidException;
+
+  PageResponse<Tournament> search(String nameQuery, Tournament.Status status, Pageable pageable);
 }

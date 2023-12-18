@@ -97,4 +97,14 @@ public class TournamentController {
     tournamentService.handleTeamRegistrationApproval(id, teamId, accepted, connectedUser);
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/searcher")
+  public ResponseEntity<?> search(
+      @RequestParam String q,
+      @RequestParam(required = false) Tournament.Status status,
+      @PageableDefault(page = 0, size = 9, sort = "createdAt", direction = Direction.ASC)
+          Pageable pageable) {
+
+    return ResponseEntity.ok(tournamentService.search(q, status, pageable));
+  }
 }
