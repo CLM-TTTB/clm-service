@@ -30,7 +30,6 @@ import org.springframework.security.core.Transient;
 @ValidTournament
 @Document(collection = "tournaments")
 public class Tournament {
-
   @Transient
   public enum Status {
     UNVERIFIED,
@@ -83,6 +82,8 @@ public class Tournament {
 
   @lombok.Builder.Default private int totalEnrolledTeams = 0;
 
+  @lombok.Builder.Default private int totalAcceptedTeams = 0;
+
   @lombok.Builder.Default private boolean cancelled = false;
 
   @NotNull @DateTimeFormat @Future private Instant startTime;
@@ -98,6 +99,7 @@ public class Tournament {
     this.competitionType = CompetitionType.KNOCKOUT;
     this.visibility = Visibility.PUBLISH;
     this.totalEnrolledTeams = 0;
+    this.totalAcceptedTeams = 0;
     this.viewOnly = false;
     this.cancelled = false;
   }
@@ -135,12 +137,20 @@ public class Tournament {
     totalEnrolledTeams++;
   }
 
+  public void increaseTotalAcceptedTeamsBy1() {
+    totalAcceptedTeams++;
+  }
+
+  public void decreaseTotalAcceptedTeamsBy1() {
+    totalAcceptedTeams = totalAcceptedTeams > 0 ? totalAcceptedTeams - 1 : 0;
+  }
+
   public boolean isFull() {
-    return totalEnrolledTeams >= maxTeams;
+    return totalAcceptedTeams >= maxTeams;
   }
 
   public boolean isEnoughTeams() {
-    return totalEnrolledTeams >= minTeams;
+    return totalAcceptedTeams >= minTeams;
   }
 
   public boolean isEnrollmentOpen() {

@@ -1,6 +1,7 @@
 package com.clm.api.tournament;
 
 import com.clm.api.enums.Visibility;
+import com.clm.api.exceptions.business.InvalidException;
 import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.exceptions.business.TeamRegistrationFailedException;
 import com.clm.api.response.PageResponse;
@@ -14,6 +15,7 @@ import java.security.Principal;
 import java.time.Instant;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @lombok.RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class TournamentServiceImpl implements TournamentService {
   }
 
   @Override
+  @Transactional
   public Tournament create(Tournament tournament, Principal connectedUser) {
     User user = PrincipalHelper.getUser(connectedUser);
     tournament.setCreatorId(user.getId());
@@ -88,6 +91,7 @@ public class TournamentServiceImpl implements TournamentService {
   }
 
   @Override
+  @Transactional
   public Team addTeam(String tournamentId, Team team, Principal connectedUser) {
     Tournament tournament =
         tournamentRepository
@@ -148,5 +152,43 @@ public class TournamentServiceImpl implements TournamentService {
     team.setTournamentId(tournamentId);
     team.setCreatorId(user.getId());
     return teamRepository.save(team);
+  }
+
+  @Override
+  @Transactional
+  public void handleTeamRegistrationApproval(
+      String tournamentId, String teamId, boolean accepted, Principal connectedUser)
+      throws NotFoundException, InvalidException {
+    Tournament tournament =
+        tournamentRepository
+            .findById(tournamentId)
+            .orElseThrow(() -> new NotFoundException("Tournament not found"));
+
+    if (tournament.isFull()) {
+      throw new InvalidException("Tournament is full, cannot accept more teams");
+    }
+
+    User user = PrincipalHelper.getUser(connectedUser);
+    if (!tournament.getCreatorId().equals(user.getId())) {
+      throw new NotFoundException("You are not the creator of this tournament");
+    }
+    Team team =
+        teamRepository.findById(teamId).orElseThrow(() -> new NotFoundException("Team not found"));
+
+    if (!team.getTournamentId().equals(tournamentId)) {
+      throw new NotFoundException("Team not found in this tournament");
+    }
+
+    if (accepted) {
+      team.setStatus(Team.Status.ACCEPTED);
+      tournament.increaseTotalAcceptedTeamsBy1();
+    } else {
+      if (team.getStatus() == Team.Status.ACCEPTED) {
+        tournament.decreaseTotalAcceptedTeamsBy1();
+      }
+      team.setStatus(Team.Status.REFUSED);
+    }
+    teamRepository.save(team);
+    tournamentRepository.save(tournament);
   }
 }

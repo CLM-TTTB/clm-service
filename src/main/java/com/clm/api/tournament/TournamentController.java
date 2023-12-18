@@ -64,4 +64,14 @@ public class TournamentController {
           Pageable pageable) {
     return ResponseEntity.ok(tournamentService.getEnrolledTeams(id, status, pageable));
   }
+
+  @PostMapping("/{id}/approval/teams/{teamId}")
+  public ResponseEntity<?> handleTeamRegistrationApproval(
+      @PathVariable("id") String id,
+      @PathVariable("teamId") String teamId,
+      @RequestParam boolean accepted,
+      Principal connectedUser) {
+    tournamentService.handleTeamRegistrationApproval(id, teamId, accepted, connectedUser);
+    return ResponseEntity.noContent().build();
+  }
 }
