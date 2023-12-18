@@ -4,10 +4,9 @@ import com.clm.api.constants.Regex;
 import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.team.member.TeamMember;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
@@ -49,13 +48,9 @@ public class Team {
   @lombok.Builder.Default private String image = "";
   @lombok.Builder.Default private String description = "";
 
-  @Size(min = 1, message = ErrorMessage.UNIFORM_LIST_EMPTY)
-  @NotNull
-  private List<String> uniforms;
+  @lombok.Builder.Default private List<String> uniforms = new ArrayList<>();
 
-  @Size(min = 1, message = ErrorMessage.TEAM_MEMBER_LIST_EMPTY)
-  @NotNull
-  private List<TeamMember> members;
+  @lombok.Builder.Default private List<TeamMember> members = new ArrayList<>();
 
   private String nextGameId;
 
@@ -81,6 +76,8 @@ public class Team {
     this.description = "";
     this.status = Status.PENDING;
     this.previousGameIds = new LinkedList<>();
+    this.members = new ArrayList<>();
+    this.uniforms = new ArrayList<>();
   }
 
   public Team(TeamTemplate teamTemplate) {

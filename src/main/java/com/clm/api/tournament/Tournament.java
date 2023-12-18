@@ -105,10 +105,12 @@ public class Tournament {
   }
 
   public boolean isEnoughPlayersPerTeam(List<TeamMember> members) {
+    if (members == null) return false;
     return members.stream().filter(m -> m instanceof Player).count() >= minPlayersPerTeam;
   }
 
   public boolean isExceedPlayersPerTeam(List<TeamMember> members) {
+    if (members == null) return false;
     return members.stream().filter(m -> m instanceof Player).count() > maxPlayersPerTeam;
   }
 

@@ -4,8 +4,8 @@ import com.clm.api.constants.Regex;
 import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.team.member.TeamMember;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -36,14 +36,16 @@ public class TeamTemplate {
   @lombok.Builder.Default private String image = "";
   @lombok.Builder.Default private String description = "";
 
-  @NotNull private List<TeamMember> members;
+  @lombok.Builder.Default private List<TeamMember> members = new ArrayList<>();
 
   // Save the list of uniform images url
-  private List<String> uniforms;
+  @lombok.Builder.Default private List<String> uniforms = new ArrayList<>();
 
   public TeamTemplate() {
     this.image = "";
     this.description = "";
+    this.members = new ArrayList<>();
+    this.uniforms = new ArrayList<>();
   }
 
   public TeamTemplate(Team team) {

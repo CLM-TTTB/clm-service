@@ -168,12 +168,6 @@ public class TournamentServiceImpl implements TournamentService {
     } else if (tournament.isFull()) {
       throw new TeamRegistrationFailedException(
           TeamRegistrationFailedException.Reason.MAX_TEAMS_REACHED);
-    } else if (!tournament.isEnoughPlayersPerTeam(team.getMembers())) {
-      throw new TeamRegistrationFailedException(
-          TeamRegistrationFailedException.Reason.TEAM_TOO_SMALL);
-    } else if (tournament.isExceedPlayersPerTeam(team.getMembers())) {
-      throw new TeamRegistrationFailedException(
-          TeamRegistrationFailedException.Reason.TEAM_TOO_BIG);
     } else if (teamRepository.existsByTournamentIdAndName(tournamentId, team.getName())) {
       throw new TeamRegistrationFailedException(
           TeamRegistrationFailedException.Reason.TEAM_NAME_ALREADY_TAKEN);
@@ -181,28 +175,6 @@ public class TournamentServiceImpl implements TournamentService {
       throw new TeamRegistrationFailedException(
           TeamRegistrationFailedException.Reason.ALREADY_ENROLLED);
     }
-    // else {
-    // List<Team> teams =
-    //     teamRepository
-    //         .findByTournamentIdAndStatus(tournamentId, Team.Status.ACCEPTED)
-    //         .orElse(null);
-    // if (teams != null) {
-    //   if (teams.stream().anyMatch(t -> t.getCreatorId().equals(user.getId()))) {
-    //     throw new TeamRegistrationFailedException(
-    //         TeamRegistrationFailedException.Reason.ALREADY_ENROLLED);
-    //   } else if (teams.stream().anyMatch(t -> t.getName().equals(team.getName()))) {
-    //     throw new TeamRegistrationFailedException(
-    //         TeamRegistrationFailedException.Reason.TEAM_NAME_ALREADY_TAKEN);
-    //   }
-    // }
-    //   if (teamRepository.existsByTournamentIdAndName(tournamentId, team.getName())) {
-    //     throw new TeamRegistrationFailedException(
-    //         TeamRegistrationFailedException.Reason.TEAM_NAME_ALREADY_TAKEN);
-    //   } else if (teamRepository.existsByTournamentIdAndCreatorId(tournamentId, user.getId())) {
-    //     throw new TeamRegistrationFailedException(
-    //         TeamRegistrationFailedException.Reason.ALREADY_ENROLLED);
-    //   }
-    // }
 
     tournament.increaseTotalEnrolledTeamsBy1();
     tournamentRepository.save(tournament);
@@ -216,24 +188,33 @@ public class TournamentServiceImpl implements TournamentService {
   public void handleTeamRegistrationApproval(
       String tournamentId, String teamId, boolean accepted, Principal connectedUser)
       throws NotFoundException, InvalidException {
+
     Tournament tournament =
         tournamentRepository
             .findById(tournamentId)
             .orElseThrow(() -> new NotFoundException("Tournament not found"));
 
     if (tournament.isFull()) {
-      throw new InvalidException("Tournament is full, cannot accept more teams");
+      throw new TeamRegistrationFailedException(
+          TeamRegistrationFailedException.Reason.MAX_TEAMS_REACHED);
     }
 
     User user = PrincipalHelper.getUser(connectedUser);
     if (!tournament.getCreatorId().equals(user.getId())) {
       throw new NotFoundException("You are not the creator of this tournament");
     }
+
     Team team =
         teamRepository.findById(teamId).orElseThrow(() -> new NotFoundException("Team not found"));
 
     if (!team.getTournamentId().equals(tournamentId)) {
       throw new NotFoundException("Team not found in this tournament");
+    } else if (!tournament.isEnoughPlayersPerTeam(team.getMembers())) {
+      throw new TeamRegistrationFailedException(
+          TeamRegistrationFailedException.Reason.TEAM_TOO_SMALL);
+    } else if (tournament.isExceedPlayersPerTeam(team.getMembers())) {
+      throw new TeamRegistrationFailedException(
+          TeamRegistrationFailedException.Reason.TEAM_TOO_BIG);
     }
 
     if (accepted) {
