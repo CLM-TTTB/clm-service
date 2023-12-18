@@ -6,19 +6,19 @@ import org.springframework.http.HttpStatus;
 public class InvalidException extends BusinessException {
 
   public InvalidException() {
-    super(HttpStatus.BAD_REQUEST, "Invalid");
+    super(HttpStatus.FORBIDDEN, "Invalid");
   }
 
   public InvalidException(String message) {
-    super(HttpStatus.BAD_REQUEST, message);
+    super(HttpStatus.FORBIDDEN, message);
   }
 
   public InvalidException(HttpStatus status, String message) {
-    super(HttpStatus.BAD_REQUEST, message);
+    super(status, message);
   }
 
   public InvalidException(String message, Throwable cause) {
-    super(HttpStatus.BAD_REQUEST, message, cause);
+    super(HttpStatus.FORBIDDEN, message, cause);
   }
 
   public InvalidException(HttpStatus status, String message, Throwable cause) {

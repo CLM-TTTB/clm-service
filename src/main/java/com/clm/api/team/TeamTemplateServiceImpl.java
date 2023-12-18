@@ -5,8 +5,10 @@ import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
 import java.security.Principal;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** TeamTemplateServiceImpl */
 @Service
@@ -16,7 +18,7 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
   private final TeamTemplateRepository teamTemplateRepository;
 
   @Value("${clm.props.max-team-template}")
-  private long maxTeamTemplateCount;
+  private long MAX_TEAM_TEMPLATE;
 
   @Override
   public TeamTemplate get(String id) {
@@ -26,6 +28,7 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
   }
 
   @Override
+  @Transactional
   public TeamTemplate create(TeamTemplate teamTemplate, Principal connectedUser) {
     User user = PrincipalHelper.getUser(connectedUser);
 
@@ -33,13 +36,13 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
       throw new AlreadyExistsException(
           "Team template with name '" + teamTemplate.getName() + "' already exists");
     }
-    if (teamTemplateRepository.countByCreatorId(user.getId()) < maxTeamTemplateCount) {
+    if (teamTemplateRepository.countByCreatorId(user.getId()) < MAX_TEAM_TEMPLATE) {
       teamTemplate.setCreatorId(user.getId());
       return teamTemplateRepository.save(teamTemplate);
 
     } else {
       throw new AlreadyExistsException(
-          "You have reached the maximum number of team templates: " + maxTeamTemplateCount);
+          "You have reached the maximum number of team templates: " + MAX_TEAM_TEMPLATE);
     }
   }
 
@@ -51,5 +54,19 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
   @Override
   public void delete(String id, Principal connectedUser) {
     teamTemplateRepository.deleteById(id);
+  }
+
+  @Override
+  public TeamTemplate saveFromRegisteredTeam(Team team, Principal connectedUser) {
+    return create(TeamTemplate.from(team), connectedUser);
+  }
+
+  @Override
+  public List<String> getAllTeamTemplateNames(Principal connectedUser) {
+    User user = PrincipalHelper.getUser(connectedUser);
+    return teamTemplateRepository
+        .findByCreatorId(user.getId())
+        .map((teamTemplates -> teamTemplates.stream().map(TeamTemplate::getName).toList()))
+        .orElseThrow(() -> new NotFoundException("No team template found"));
   }
 }

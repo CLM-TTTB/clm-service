@@ -2,7 +2,7 @@ package com.clm.api.enums;
 
 /** Visibility */
 public enum Visibility {
-  PUBLIC,
+  PUBLISH,
   PRIVATE,
-  UNLISTED
+  UNLISTED,
 }

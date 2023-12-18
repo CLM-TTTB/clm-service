@@ -99,7 +99,7 @@ public class EmailVerificationService implements TwoStepVerificationService {
       String identifier, EmailVerificationToken emailVerificationToken) {
     String link =
         API_V1_URL
-            + "/v1/auth/two-step-verification/email?token="
+            + "/auth/two-step-verification/email?token="
             + UriEncoder.encode(emailVerificationToken.getToken())
             + "&email="
             + UriEncoder.encode(Base64Encryption.encodeBetter(identifier));

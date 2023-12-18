@@ -1,6 +1,7 @@
 package com.clm.api.exceptions.handlers;
 
 import com.clm.api.exceptions.business.InvalidException;
+import com.clm.api.exceptions.business.TeamRegistrationFailedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -17,5 +18,12 @@ public class ApplicationExceptionHandler extends CustomExceptionHandler {
   public ResponseEntity<?> handleInvalidException(InvalidException e, HttpServletRequest request) {
     return ResponseEntity.status(e.getStatus())
         .body(buildErrorMessage(e.getStatus(), e.getMessage(), e, request));
+  }
+
+  @ExceptionHandler(TeamRegistrationFailedException.class)
+  public ResponseEntity<?> handleTeamRegistrationFailedException(
+      TeamRegistrationFailedException e, HttpServletRequest request) {
+    return ResponseEntity.status(e.getStatus())
+        .body(buildErrorMessage(e.getStatus(), e.getMessage(), e, request, e.getReason()));
   }
 }

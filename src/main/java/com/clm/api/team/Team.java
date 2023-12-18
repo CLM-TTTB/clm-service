@@ -7,10 +7,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /** Team */
@@ -31,8 +35,8 @@ public class Team {
 
   @Id private String id;
 
-  private String tournamentId;
-  private String creatorId;
+  @Indexed private String tournamentId;
+  @Indexed private String creatorId;
 
   @lombok.Builder.Default private Status status = Status.PENDING;
 
@@ -54,6 +58,9 @@ public class Team {
   private List<TeamMember> members;
 
   private String nextGameId;
+
+  @CreatedDate @lombok.Builder.Default private Instant createdAt = Instant.now();
+  @LastModifiedDate @lombok.Builder.Default private Instant updatedAt = Instant.now();
 
   // the games that the team has played
   @lombok.Builder.Default private LinkedList<String> previousGameIds = new LinkedList<>();

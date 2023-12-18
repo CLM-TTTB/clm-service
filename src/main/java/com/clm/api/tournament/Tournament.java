@@ -5,15 +5,19 @@ import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.enums.AgeGroup;
 import com.clm.api.enums.CompetitionType;
 import com.clm.api.enums.Visibility;
+import com.clm.api.team.member.TeamMember;
+import com.clm.api.team.member.player.Player;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.Instant;
+import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Transient;
@@ -29,13 +33,17 @@ public class Tournament {
 
   @Transient
   public enum Status {
+    UNVERIFIED,
     UPCOMING,
     ONGOING,
-    FINISHED
+    FINISHED,
+    CANCELLED
   }
 
   @Id private String id;
-  private String creatorId;
+
+  @Indexed private String creatorId;
+
   @NotBlank private String name;
 
   @lombok.Builder.Default private String description = "";
@@ -48,7 +56,7 @@ public class Tournament {
   @NotBlank private String location;
 
   @lombok.Builder.Default private CompetitionType competitionType = CompetitionType.KNOCKOUT;
-  @lombok.Builder.Default private Visibility visibility = Visibility.PUBLIC;
+  @lombok.Builder.Default private Visibility visibility = Visibility.PUBLISH;
 
   @NotNull private AgeGroup ageGroup;
 
@@ -73,7 +81,9 @@ public class Tournament {
   @NotNull
   private Integer minTeams;
 
-  @lombok.Builder.Default private Status status = Status.UPCOMING;
+  @lombok.Builder.Default private int totalEnrolledTeams = 0;
+
+  @lombok.Builder.Default private boolean cancelled = false;
 
   @NotNull @DateTimeFormat @Future private Instant startTime;
   @NotNull @DateTimeFormat @Future private Instant endTime;
@@ -86,8 +96,58 @@ public class Tournament {
     this.description = "";
     this.image = "";
     this.competitionType = CompetitionType.KNOCKOUT;
-    this.visibility = Visibility.PUBLIC;
+    this.visibility = Visibility.PUBLISH;
+    this.totalEnrolledTeams = 0;
     this.viewOnly = false;
-    this.status = Status.UPCOMING;
+    this.cancelled = false;
+  }
+
+  public boolean isEnoughPlayersPerTeam(List<TeamMember> members) {
+    return members.stream().filter(m -> m instanceof Player).count() >= minPlayersPerTeam;
+  }
+
+  public boolean isExceedPlayersPerTeam(List<TeamMember> members) {
+    return members.stream().filter(m -> m instanceof Player).count() > maxPlayersPerTeam;
+  }
+
+  public Status getStatus() {
+    Instant now = Instant.now();
+    if (cancelled) {
+      return Status.CANCELLED;
+    } else if (now.isBefore(startTime)) {
+      return Status.UPCOMING;
+    } else if (now.isBefore(endTime)) {
+      return Status.ONGOING;
+    } else {
+      return Status.FINISHED;
+    }
+  }
+
+  public void finish() {
+    this.endTime = Instant.now();
+  }
+
+  public void start() {
+    this.startTime = Instant.now();
+  }
+
+  public void increaseTotalEnrolledTeamsBy1() {
+    totalEnrolledTeams++;
+  }
+
+  public boolean isFull() {
+    return totalEnrolledTeams >= maxTeams;
+  }
+
+  public boolean isEnoughTeams() {
+    return totalEnrolledTeams >= minTeams;
+  }
+
+  public boolean isEnrollmentOpen() {
+    return Instant.now().isBefore(registrationDeadline);
+  }
+
+  public void cancel() {
+    this.cancelled = true;
   }
 }
