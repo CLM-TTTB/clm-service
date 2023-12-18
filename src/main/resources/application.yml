@@ -6,6 +6,13 @@ spring:
 
 clm:
   url: ${CLM_URL:http://localhost:8080}
+  client:
+    base:
+      url: ${CLM_CLIENT_URL:http://localhost:3000}
+      endpoint:
+        login: ${CLM_CLIENT_LOGIN_ENDPOINT:/login}
+        error: ${CLM_CLIENT_ERROR_ENDPOINT:/error}
+
   api:
     url:
       v1: ${CLM_API_V1_URL:http://localhost:8080/v1}

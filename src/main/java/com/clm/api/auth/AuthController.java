@@ -1,7 +1,9 @@
 package com.clm.api.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +59,13 @@ public class AuthController {
   public ResponseEntity<?> verifyEmailVerificationLink(
       @RequestParam("token") String token, @RequestParam("email") String email) {
     return ResponseEntity.ok(emailVerificationService.verify(email, Map.of("token", token)));
+  }
+
+  @GetMapping("/two-step-verification/v2/email")
+  public ResponseEntity<?> verifyEmailVerificationLink(
+      HttpServletRequest request, HttpServletResponse response) throws IOException {
+    emailVerificationService.verify(request, response);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("/two-step-verification/email")
