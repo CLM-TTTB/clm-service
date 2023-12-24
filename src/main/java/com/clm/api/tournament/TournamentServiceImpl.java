@@ -72,6 +72,10 @@ public class TournamentServiceImpl implements TournamentService {
       if (tournament.getStatus() == Tournament.Status.ONGOING
           || tournament.getStatus() == Tournament.Status.FINISHED) {
         throw new InvalidException("Cannot update an ongoing or a finished tournament");
+      } else if (updateFields.containsKey("maxTeams")
+          && (int) updateFields.get("maxTeams") < tournament.getTotalAcceptedTeams()) {
+        throw new InvalidException(
+            "Please remove some teams before decreasing the maximum number of teams");
       }
 
       for (String ignoreField : ignoreFields) {
@@ -262,14 +266,13 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     if (accepted) {
+      tournament.acceptTeam(team.getId());
       team.setStatus(Team.Status.ACCEPTED);
-      tournament.increaseTotalAcceptedTeamsBy1();
     } else {
-      if (team.getStatus() == Team.Status.ACCEPTED) {
-        tournament.decreaseTotalAcceptedTeamsBy1();
-      }
+      tournament.rejectTeam(team.getId());
       team.setStatus(Team.Status.REFUSED);
     }
+
     teamRepository.save(team);
     tournamentRepository.save(tournament);
   }

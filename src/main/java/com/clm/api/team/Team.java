@@ -29,7 +29,7 @@ public class Team {
   public enum Status {
     PENDING,
     ACCEPTED,
-    REFUSED
+    REFUSED,
   }
 
   @Transient private static final long serialVersionUID = 1L;
@@ -59,7 +59,7 @@ public class Team {
   @CreatedDate @lombok.Builder.Default private Instant createdAt = Instant.now();
   @LastModifiedDate @lombok.Builder.Default private Instant updatedAt = Instant.now();
 
-  // the games that the team has played
+  // the games that the team has playeif (accepted == 0)
   @lombok.Builder.Default private LinkedList<String> previousGameIds = new LinkedList<>();
 
   public String getPreviousGameId() {
@@ -93,10 +93,10 @@ public class Team {
     this.status = Status.PENDING;
     this.uniforms = new ArrayList<>();
     this.previousGameIds = new LinkedList<>();
-    trackPlayer();
+    // trackPlayer();
   }
 
-  private void trackPlayer() {
+  public void trackPlayer() {
     if (members == null || members.isEmpty()) {
       return;
     }

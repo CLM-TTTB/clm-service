@@ -67,37 +67,41 @@ public class TeamServiceImpl implements TeamService {
           teamRepository
               .findByIdAndCreatorId((String) identifyFields.get("id"), user.getId())
               .orElseThrow(() -> new NotFoundException("Team not found"));
-      Tournament tournament =
-          tournamentRepository
-              .findById(team.getTournamentId())
-              .orElseThrow(
-                  () -> new NotFoundException("Team is not registered for this tournament"));
 
-      if (!tournament.isEnrollmentOpen()) {
-        throw new InvalidException("Tournament enrollment is closed, cannot update team");
+      if (team.getStatus() == Team.Status.PENDING) {
+        Tournament tournament =
+            tournamentRepository
+                .findById(team.getTournamentId())
+                .orElseThrow(
+                    () -> new NotFoundException("Team is not registered for this tournament"));
+
+        if (!tournament.isEnrollmentOpen()) {
+          throw new InvalidException("Tournament enrollment is closed, cannot update team");
+        }
+
+        for (String ignoreField : ignoreFields) {
+          updateFields.remove(ignoreField);
+        }
+
+        updateFields.forEach(
+            (k, v) -> {
+              Field field = ReflectionUtils.findField(team.getClass(), k);
+              field.setAccessible(true);
+              if (k.equals("members") && v instanceof List) {
+                CollectionType type =
+                    objectMapper
+                        .getTypeFactory()
+                        .constructCollectionType(List.class, TeamMember.class);
+                List<TeamMember> members = objectMapper.convertValue(v, type);
+                ReflectionUtils.setField(field, team, members);
+              } else {
+                ReflectionUtils.setField(field, team, v);
+              }
+            });
+        return teamRepository.save(ValidationHelper.validate(team));
+      } else {
+        throw new InvalidException("Team is not pending, cannot update team");
       }
-
-      for (String ignoreField : ignoreFields) {
-        updateFields.remove(ignoreField);
-      }
-
-      updateFields.forEach(
-          (k, v) -> {
-            Field field = ReflectionUtils.findField(team.getClass(), k);
-            field.setAccessible(true);
-            if (k.equals("members") && v instanceof List) {
-              CollectionType type =
-                  objectMapper
-                      .getTypeFactory()
-                      .constructCollectionType(List.class, TeamMember.class);
-              List<TeamMember> members = objectMapper.convertValue(v, type);
-              ReflectionUtils.setField(field, team, members);
-            } else {
-              ReflectionUtils.setField(field, team, v);
-            }
-          });
-
-      return teamRepository.save(ValidationHelper.validate(team));
 
     } else {
       throw new IllegalArgumentException("No field to identify the team template");

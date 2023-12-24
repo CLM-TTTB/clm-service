@@ -4,9 +4,8 @@ import com.clm.api.card.Card;
 import com.clm.api.card.CardFactory;
 import com.clm.api.card.RedCard;
 import com.clm.api.card.YellowCard;
-import com.clm.api.game.Game;
+import com.clm.api.game.GameDetail;
 import com.clm.api.interfaces.ICard;
-import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,8 +20,6 @@ import org.springframework.data.annotation.Transient;
 public class TrackedPlayer extends Player implements ICard {
 
   @Transient private static final long serialVersionUID = 1L;
-
-  @NotNull private byte shirtNumber;
 
   private LinkedList<GoalTracker> goals;
   private LinkedList<PositionTracker> positions;
@@ -93,7 +90,7 @@ public class TrackedPlayer extends Player implements ICard {
     return false;
   }
 
-  public boolean isSuspended(Game game) {
+  public boolean isSuspended(GameDetail game) {
     return isSuspended(game.getPreviousGameId());
   }
 

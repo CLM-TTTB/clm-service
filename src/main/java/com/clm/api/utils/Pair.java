@@ -1,16 +1,25 @@
 package com.clm.api.utils;
 
-/** Pair */
-public class Pair<F, S> {
+import com.clm.api.interfaces.IPair;
 
-  private F first;
-  private S second;
+/** Pair */
+public class Pair<F, S> implements IPair<F, S> {
+
+  protected F first;
+  protected S second;
 
   public Pair(F first, S second) {
     this.first = first;
     this.second = second;
   }
 
+  public Pair(IPair<F, S> pair) {
+    this.first = pair.getFirst();
+    this.second = pair.getSecond();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
   public Object get(int index) {
     if (index == 0) {
       return first;
@@ -22,6 +31,7 @@ public class Pair<F, S> {
   }
 
   @SuppressWarnings("unchecked")
+  @Override
   public void set(int index, Object value) {
     if (index == 0) {
       first = (F) value;
@@ -32,10 +42,12 @@ public class Pair<F, S> {
     }
   }
 
+  @Override
   public boolean isEnough() {
     return first != null && second != null;
   }
 
+  @Override
   public boolean has(int index) {
     if (index == 0) {
       return hasFirst();
@@ -46,26 +58,32 @@ public class Pair<F, S> {
     }
   }
 
+  @Override
   public boolean hasFirst() {
     return first != null;
   }
 
+  @Override
   public F getFirst() {
     return first;
   }
 
+  @Override
   public void setFirst(F first) {
     this.first = first;
   }
 
+  @Override
   public boolean hasSecond() {
     return second != null;
   }
 
+  @Override
   public S getSecond() {
     return second;
   }
 
+  @Override
   public void setSecond(S second) {
     this.second = second;
   }

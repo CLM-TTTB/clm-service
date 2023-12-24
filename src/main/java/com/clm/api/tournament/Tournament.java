@@ -7,13 +7,16 @@ import com.clm.api.enums.CompetitionType;
 import com.clm.api.enums.Visibility;
 import com.clm.api.team.member.TeamMember;
 import com.clm.api.team.member.player.Player;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -88,6 +91,8 @@ public class Tournament {
 
   @lombok.Builder.Default private int totalEnrolledTeams = 0;
 
+  @JsonIgnore @lombok.Builder.Default private Set<String> acceptedTeamIds = new HashSet<>();
+
   @lombok.Builder.Default private int totalAcceptedTeams = 0;
 
   @lombok.Builder.Default private boolean cancelled = false;
@@ -108,6 +113,7 @@ public class Tournament {
     this.totalAcceptedTeams = 0;
     this.viewOnly = false;
     this.cancelled = false;
+    this.acceptedTeamIds = new HashSet<>();
   }
 
   public boolean isEnoughPlayersPerTeam(List<TeamMember> members) {
@@ -141,16 +147,24 @@ public class Tournament {
     this.startTime = Instant.now();
   }
 
+  public void acceptTeam(String teamId) {
+    if (acceptedTeamIds.add(teamId)) {
+      totalAcceptedTeams++;
+    }
+  }
+
+  public void rejectTeam(String teamId) {
+    if (acceptedTeamIds.remove(teamId)) {
+      totalAcceptedTeams = totalAcceptedTeams > 0 ? totalAcceptedTeams - 1 : 0;
+    }
+  }
+
   public void increaseTotalEnrolledTeamsBy1() {
     totalEnrolledTeams++;
   }
 
-  public void increaseTotalAcceptedTeamsBy1() {
-    totalAcceptedTeams++;
-  }
-
-  public void decreaseTotalAcceptedTeamsBy1() {
-    totalAcceptedTeams = totalAcceptedTeams > 0 ? totalAcceptedTeams - 1 : 0;
+  public void decreaseTotalEnrolledTeamsBy1() {
+    totalEnrolledTeams = totalEnrolledTeams > 0 ? totalEnrolledTeams - 1 : 0;
   }
 
   public boolean isFull() {

@@ -2,8 +2,8 @@ package com.clm.api.team.member;
 
 import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.team.member.player.Player;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,17 +16,23 @@ import org.springframework.data.annotation.Transient;
 @lombok.experimental.SuperBuilder
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
     property = "role",
     defaultImpl = Player.class)
-@JsonSubTypes({
-  @JsonSubTypes.Type(value = Player.class, name = "PLAYER"),
-  // @JsonSubTypes.Type(value = TrackedPlayer.class, name = "TRACKED_PLAYER"),
-})
 public abstract class TeamMember {
+
+  @JsonTypeName
+  public enum Role {
+    PLAYER,
+    COACH,
+    MANAGER
+  }
+
   @Transient private static final long serialVersionUID = 1L;
 
   @Id protected String id;
+
+  private Role role;
 
   @NotBlank protected String name;
 
@@ -40,9 +46,10 @@ public abstract class TeamMember {
   // NOTE: If the member of a team has the account in the system, the userId will be set.
   protected String userId;
 
-  public TeamMember() {
+  protected TeamMember(Role role) {
     this.image = "";
     this.description = "";
+    this.role = role;
   }
 
   public TeamMember(TeamMember teamMember) {
@@ -53,23 +60,23 @@ public abstract class TeamMember {
     this.userId = teamMember.getUserId();
   }
 
-  public TeamMember(String id, String name, Byte age) {
-    this.id = id;
-    this.name = name;
-    this.age = age;
-    this.image = "";
-    this.description = "";
-  }
+  // public TeamMember(String id, String name, Byte age) {
+  //   this.id = id;
+  //   this.name = name;
+  //   this.age = age;
+  //   this.image = "";
+  //   this.description = "";
+  // }
 
-  public TeamMember(String id, String name, Byte age, String image, String description) {
-    this(id, name, age);
-    this.image = image;
-    this.description = description;
-  }
+  // public TeamMember(String id, String name, Byte age, String image, String description) {
+  //   this(id, name, age);
+  //   this.image = image;
+  //   this.description = description;
+  // }
 
-  public TeamMember(
-      String id, String name, Byte age, String image, String description, String userId) {
-    this(id, name, age, image, description);
-    this.userId = userId;
-  }
+  // public TeamMember(
+  //     String id, String name, Byte age, String image, String description, String userId) {
+  //   this(id, name, age, image, description);
+  //   this.userId = userId;
+  // }
 }

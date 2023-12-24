@@ -1,19 +1,15 @@
 package com.clm.api.game;
 
 import com.clm.api.enums.CompetitionType;
-import com.clm.api.game.Round.GameInfo;
-import com.clm.api.game.Round.TeamTracker;
+import com.clm.api.game.Game.TeamTracker;
 import com.clm.api.interfaces.IRoundMaker;
-import com.clm.api.utils.Pair;
+import com.clm.api.utils.DuplicatePair;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/** KnockOutGameTracker */
 @lombok.Getter
 @lombok.Setter
-@lombok.NoArgsConstructor
-@lombok.experimental.SuperBuilder
 public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
   // gameId = tournamentId + roundIndex + gameIndex + timestamp
 
@@ -21,7 +17,7 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
 
   public KnockOutGameTracker(String tournamentId, List<String> teamIds) {
     super(tournamentId, teamIds, CompetitionType.KNOCKOUT);
-    if (teamIds.size() < 2) {
+    if (teamIds == null || teamIds.size() < 2) {
       throw new UnsupportedOperationException(
           "Cannot create KnockOutGameTracker, not enough teams provided: " + teamIds.size());
     }
@@ -33,86 +29,74 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
   }
 
   private void initFirstRound() {
-    if (teamIds == null) {
-      throw new UnsupportedOperationException("Cannot create first round, no teams provided");
-    }
-
     Round firstRound = new Round();
-    ArrayList<GameInfo> games = new ArrayList<>();
+    ArrayList<Game> games = new ArrayList<>();
 
     int numberOfTeams = teamIds.size();
 
-    if (numberOfTeams < 2) {
-      throw new UnsupportedOperationException(
-          "Cannot create first round, not enough teams provided: " + numberOfTeams);
-    }
+    for (int i = 0; i < numberOfTeams - 1; i += 2) {
+      DuplicatePair<TeamTracker> teamTrackers =
+          new DuplicatePair<>(
+              new TeamTracker(teamIds.get(i), 0), new TeamTracker(teamIds.get(i + 1), 0));
 
-    for (int i = 0; i < numberOfTeams; i += 2) {
-      Pair<TeamTracker, TeamTracker> teamTrackers =
-          Pair.of(new TeamTracker(teamIds.get(i), 0), new TeamTracker(teamIds.get(i + 1), 0));
-
-      String gameId = GameInfo.genGameId(this.getTournamentId(), 0, teamTrackers);
-      games.add(new GameInfo(teamTrackers, gameId));
+      String gameId = Game.genGameId(this.getTournamentId(), 0, teamTrackers);
+      games.add(new Game(teamTrackers, gameId));
     }
 
     if (numberOfTeams % 2 != 0) {
-      Pair<TeamTracker, TeamTracker> teamTrackers =
-          Pair.of(new TeamTracker(teamIds.get(numberOfTeams - 1), 0), null);
+      DuplicatePair<TeamTracker> teamTrackers =
+          new DuplicatePair<>(new TeamTracker(teamIds.get(numberOfTeams - 1), 0), null);
 
-      String gameId = GameInfo.genGameId(this.getTournamentId(), 0, teamTrackers);
-      games.add(new GameInfo(teamTrackers, gameId, 0));
+      String gameId = Game.genGameId(this.getTournamentId(), 0, teamTrackers);
+      games.add(new Game(teamTrackers, gameId, 0));
     }
 
     firstRound.setGames(games);
 
-    if (rounds == null) rounds = new LinkedList<>();
     rounds.add(firstRound);
   }
 
   private void createNextRound() {
-    if (!hasRound()) {
+    if (hasRound()) {
+      rounds.add(new Round(createNextRoundGames(rounds.getLast().getGames())));
+    } else {
       initFirstRound();
-      return;
     }
-    rounds.add(new Round(createNextRoundGames(rounds.getLast().getGames())));
   }
 
-  private List<GameInfo> createNextRoundGames(List<GameInfo> previousRoundGames) {
-    List<GameInfo> nextRoundGames = new ArrayList<>();
+  private List<Game> createNextRoundGames(List<Game> previousRoundGames) {
+    List<Game> nextRoundGames = new ArrayList<>();
 
     int numberOfGames = previousRoundGames.size();
-    for (int i = 0; i < numberOfGames; i += 2) {
-      Pair<TeamTracker, TeamTracker> teamTrackers =
-          Pair.of(previousRoundGames.get(i).getWinner(), previousRoundGames.get(i + 1).getWinner());
-      String gameId = GameInfo.genGameId(this.getTournamentId(), rounds.size() - 1, teamTrackers);
-      nextRoundGames.add(new GameInfo(teamTrackers, gameId));
+    for (int i = 0; i < numberOfGames - 1; i += 2) {
+      DuplicatePair<TeamTracker> teamTrackers =
+          new DuplicatePair<>(
+              previousRoundGames.get(i).getWinner(), previousRoundGames.get(i + 1).getWinner());
+      String gameId = Game.genGameId(this.getTournamentId(), rounds.size() - 1, teamTrackers);
+      nextRoundGames.add(new Game(teamTrackers, gameId));
     }
 
     if (numberOfGames % 2 != 0) {
-      Pair<TeamTracker, TeamTracker> teamTrackers =
-          Pair.of(previousRoundGames.get(numberOfGames - 1).getWinner(), null);
-      String gameId = GameInfo.genGameId(this.getTournamentId(), rounds.size() - 1, teamTrackers);
-      nextRoundGames.add(new GameInfo(teamTrackers, gameId, 0));
+      DuplicatePair<TeamTracker> teamTrackers =
+          new DuplicatePair<>(previousRoundGames.get(numberOfGames - 1).getWinner(), null);
+
+      String gameId = Game.genGameId(this.getTournamentId(), rounds.size() - 1, teamTrackers);
+      nextRoundGames.add(new Game(teamTrackers, gameId, 0));
     }
     return nextRoundGames;
   }
 
   public void updateRound(int roundIndex) {
-    if (roundIndex < 0 || roundIndex >= rounds.size()) {
-      throw new IndexOutOfBoundsException(
-          "Cannot re-create round, round index out of bounds: " + roundIndex);
-    }
+    if (roundIndex < 0 || roundIndex >= rounds.size()) return;
 
-    if (roundIndex == 0) {
-      if (rounds == null || rounds.isEmpty()) {
-        initFirstRound();
-      }
+    if (roundIndex == 0 && !hasRound()) {
+      initFirstRound();
       return;
     }
 
-    List<GameInfo> games = rounds.get(roundIndex).getGames();
+    List<Game> games = rounds.get(roundIndex).getGames();
     for (int i = 0; i < games.size(); i++) {
-      GameInfo game = games.get(i);
+      Game game = games.get(i);
       if (!game.hasWinner()) {
         if (game.getTeam1() == null) {
           int prevGameIndex = getThePreviousGameIndex(roundIndex, i, true);
@@ -123,7 +107,7 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
           game.setTeam2(rounds.get(roundIndex - 1).getGames().get(prevGameIndex).getWinner());
         }
         if (game.isEnoughTeams() && game.getGameId() == null) {
-          game.setGameId(GameInfo.genGameId(this.getTournamentId(), roundIndex, game.getTeams()));
+          game.setGameId(Game.genGameId(this.getTournamentId(), roundIndex, game.getTeams()));
         }
       }
     }
@@ -161,23 +145,27 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
               + (rounds.size() - 1));
     }
 
-    List<GameInfo> currRoundGames = rounds.get(currRoundIndex).getGames();
+    List<Game> currRoundGames = rounds.get(currRoundIndex).getGames();
     int currRoundGamesSize = currRoundGames.size();
     for (int i = 0; i < currRoundGamesSize; i++) {
-      GameInfo currGame = currRoundGames.get(i);
+      Game currGame = currRoundGames.get(i);
       if (currGame.getTeam1Id().equals(teamId)) {
         return getThePreviousGameIndex(currRoundIndex, i, true);
       } else if (currGame.getTeam2Id().equals(teamId)) {
         return getThePreviousGameIndex(currRoundIndex, i, false);
       }
     }
+
     throw new UnsupportedOperationException(
         "Cannot get previous game index, team not found: " + teamId);
   }
 
   @Override
   public List<Round> createAllRounds() {
-    while (rounds.getLast().getGames().size() > 1) {
+    if (!hasRound()) {
+      initFirstRound();
+    }
+    while (!rounds.getLast().isFinal()) {
       createNextRound();
     }
     return rounds;
@@ -185,10 +173,10 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
 
   @Override
   public List<Round> updateAllRounds() {
-    if (rounds == null || rounds.isEmpty()) {
+    if (!hasRound()) {
       createAllRounds();
     }
-    while (rounds.getLast().getGames().size() > 1) {
+    while (!rounds.getLast().isFinal()) {
       updateRound(rounds.size() - 1);
     }
     return rounds;
