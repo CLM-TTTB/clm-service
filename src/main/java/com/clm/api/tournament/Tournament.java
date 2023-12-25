@@ -34,7 +34,6 @@ public class Tournament {
     UPCOMING,
     ONGOING,
     FINISHED,
-    ENROLLMENT_OPEN,
     CANCELLED
   }
 
@@ -125,8 +124,6 @@ public class Tournament {
     Instant now = Instant.now();
     if (cancelled) {
       return Status.CANCELLED;
-    } else if (now.isBefore(registrationDeadline)) {
-      return Status.ENROLLMENT_OPEN;
     } else if (now.isBefore(startTime)) {
       return Status.UPCOMING;
     } else if (now.isBefore(endTime)) {
