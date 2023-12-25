@@ -93,10 +93,10 @@ public class Team {
     this.status = Status.PENDING;
     this.uniforms = new ArrayList<>();
     this.previousGameIds = new LinkedList<>();
-    changePlayerToTrackedPlayer();
+    trackPlayer();
   }
 
-  private void changePlayerToTrackedPlayer() {
+  private void trackPlayer() {
     if (members == null || members.isEmpty()) {
       return;
     }

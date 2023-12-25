@@ -37,7 +37,8 @@ public class Base64Encryption {
   }
 
   public static String encodeBetter(String str, int maxSecretKeyLength) {
-    String secretKeyRandom = randomNumOrChar((int) (Math.random() * (maxSecretKeyLength - 1) + 1));
+    String secretKeyRandom =
+        RandomHelper.randomNumOrChar((int) (Math.random() * (maxSecretKeyLength - 1) + 1));
     int secretKeyLength = secretKeyRandom.length();
     int numOfCharOfSecretKeyLength = String.valueOf(secretKeyLength).length();
 
@@ -91,34 +92,5 @@ public class Base64Encryption {
   // Inserts a string into another string at a specific index
   private static String insertString(String original, int index, String insertStr) {
     return original.substring(0, index) + insertStr + original.substring(index);
-  }
-
-  // random char both uppercase and lowercase
-  private static char randomChar() {
-    return Math.random() > 0.5 ? randomLowercaseChar() : randomUppercaseChar();
-  }
-
-  private static char randomLowercaseChar() {
-    return (char) (Math.random() * 26 + 'a');
-  }
-
-  private static char randomUppercaseChar() {
-    return (char) (Math.random() * 26 + 'A');
-  }
-
-  private static int randomNum() {
-    return (int) (Math.random() * 10);
-  }
-
-  private static char randomNumOrChar() {
-    return Math.random() > 0.5 ? randomChar() : (char) randomNum();
-  }
-
-  private static String randomNumOrChar(int length) {
-    String str = "";
-    for (int i = 0; i < length; i++) {
-      str += randomNumOrChar();
-    }
-    return str;
   }
 }

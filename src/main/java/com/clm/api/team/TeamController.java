@@ -3,6 +3,7 @@ package com.clm.api.team;
 import java.security.Principal;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,5 +29,10 @@ public class TeamController {
             updateFields,
             new String[] {"id", "creatorId", "tournamentId", "status", "createdAt", "updatedAt"},
             connectedUser));
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getTeamById(@PathVariable("id") String id) {
+    return ResponseEntity.ok(teamService.get(id));
   }
 }

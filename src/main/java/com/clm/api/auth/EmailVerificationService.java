@@ -112,22 +112,25 @@ public class EmailVerificationService implements TwoStepVerificationService {
     String token = request.getParameter("token");
     String identifier = request.getParameter("email");
     if (token == null || token.isEmpty()) {
-      System.out.println("Error at SendingEmail.java: Required props.token is missing");
-      throw new IllegalArgumentException("Required props.token is missing");
+      System.out.println("Error at sending email: Required token is missing");
+      throw new IllegalArgumentException("Required token is missing");
     }
 
     String email = Base64Encryption.decodeBetter(identifier);
 
     User user = userRepository.findByEmail(email).orElse(null);
-    if (user == null || user.getEmailVerificationToken() == null) {
-      response.sendRedirect("http://localhost:3000/error");
+    if (user == null
+        || user.getEmailVerificationToken() == null
+        || !user.getEmailVerificationToken().isValid(token)) {
+      response.sendRedirect(BASE_CLIENT_URL + ERROR_ENDPOINT);
+      return;
     }
 
-    if (user.getEmailVerificationToken().isValid(token)) {
-      user.setStatus(User.Status.ACTIVE);
-      user.setEmailVerificationToken(null);
-      userRepository.save(user);
+    user.setStatus(User.Status.ACTIVE);
+    user.setEmailVerificationToken(null);
+    if (userRepository.save(user) != null) {
       response.sendRedirect(BASE_CLIENT_URL + LOGIN_ENDPOINT);
+      return;
     }
     response.sendRedirect(BASE_CLIENT_URL + ERROR_ENDPOINT);
   }

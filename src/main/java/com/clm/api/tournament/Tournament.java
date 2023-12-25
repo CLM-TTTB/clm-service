@@ -7,6 +7,7 @@ import com.clm.api.enums.CompetitionType;
 import com.clm.api.enums.Visibility;
 import com.clm.api.team.member.TeamMember;
 import com.clm.api.team.member.player.Player;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,10 +18,10 @@ import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.Transient;
 
 /** Match */
 @lombok.Getter
@@ -30,7 +31,6 @@ import org.springframework.security.core.Transient;
 @ValidTournament
 @Document(collection = "tournaments")
 public class Tournament {
-  @Transient
   public enum Status {
     UNVERIFIED,
     UPCOMING,
@@ -47,7 +47,10 @@ public class Tournament {
   @NotBlank private String name;
 
   @lombok.Builder.Default private String description = "";
-  @lombok.Builder.Default private String image = "";
+
+  @JsonIgnore @lombok.Builder.Default private String imagePath = "";
+
+  @Transient @lombok.Builder.Default private byte[] image = new byte[0];
 
   @NotBlank
   @Pattern(regexp = Regex.PHONE_NUMBER, message = ErrorMessage.PHONE_NUMBER_INVALID)
@@ -57,6 +60,13 @@ public class Tournament {
 
   @lombok.Builder.Default private CompetitionType competitionType = CompetitionType.KNOCKOUT;
   @lombok.Builder.Default private Visibility visibility = Visibility.PUBLISH;
+
+  public void setVisibility(Visibility visibility) {
+    this.visibility = visibility;
+    if (visibility == Visibility.PRIVATE) {
+      this.viewOnly = true;
+    }
+  }
 
   @NotNull private AgeGroup ageGroup;
 
@@ -96,7 +106,7 @@ public class Tournament {
 
   public Tournament() {
     this.description = "";
-    this.image = "";
+    this.imagePath = "";
     this.competitionType = CompetitionType.KNOCKOUT;
     this.visibility = Visibility.PUBLISH;
     this.totalEnrolledTeams = 0;

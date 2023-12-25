@@ -39,6 +39,12 @@ public class TeamTemplateController {
     return ResponseEntity.ok(teamTemplateService.getAllTeamTemplateNames(connectedUser));
   }
 
+  @GetMapping("/info/{id}")
+  public ResponseEntity<?> getTeamTemplateById(
+      @PathVariable("id") String id, Principal connectedUser) {
+    return ResponseEntity.ok(teamTemplateService.get(id));
+  }
+
   @GetMapping("/{name}")
   public ResponseEntity<?> createTeamFromTemplate(
       @PathVariable("name") String name, Principal connectedUser) {

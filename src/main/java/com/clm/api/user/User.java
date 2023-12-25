@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Pattern;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -56,7 +57,8 @@ public class User implements UserDetails {
 
   @NotNull @JsonIgnore private EmailVerificationToken emailVerificationToken;
 
-  @lombok.Builder.Default private String name = "User" + System.currentTimeMillis();
+  @lombok.Builder.Default
+  private String name = "User" + System.currentTimeMillis() + new Random().nextInt(100000);
 
   @lombok.Builder.Default private String avatar = "";
 
@@ -70,7 +72,7 @@ public class User implements UserDetails {
 
   public User() {
     this.avatar = "";
-    this.name = "User" + System.currentTimeMillis();
+    this.name = "User" + System.currentTimeMillis() + new Random().nextInt(100000);
     this.status = Status.EMAIL_UNVERIFIED;
   }
 

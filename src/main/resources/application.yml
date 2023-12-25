@@ -5,6 +5,13 @@ spring:
       uri: mongodb+srv://${MONGO_USER:admin}:${MONGO_PASSWORD:admin}@${MONGO_CLUSTER:clm}.1syajun.mongodb.net/?retryWrites=true&w=majority
 
 clm:
+  upload:
+    path:
+      image: ${CLM_UPLOAD_PATH_IMAGE:client_upload/images}
+      document: ${CLM_UPLOAD_PATH_DOCUMENT:client_upload/documents}
+    max-size: ${CLM_UPLOAD_MAX_SIZE:5MB}
+    max-request-size: ${CLM_UPLOAD_MAX_REQUEST_SIZE:5MB}
+    file-size-threshold: ${CLM_UPLOAD_FILE_SIZE_THRESHOLD:0}
   url: ${CLM_URL:http://localhost:8080}
   client:
     base:
