@@ -9,6 +9,7 @@ public class TournamentValidator implements ConstraintValidator<ValidTournament,
 
   @Override
   public boolean isValid(Tournament value, ConstraintValidatorContext context) {
+
     if (value == null) {
       addConstraintViolation(context, "Tournament cannot be null");
       return false;
