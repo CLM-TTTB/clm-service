@@ -92,7 +92,17 @@ public class KnockOutGameTracker extends GameTracker {
     List<Game> games = rounds.get(roundIndex).getGames();
     for (int i = 0; i < games.size(); i++) {
       Game game = games.get(i);
-      if (!game.hasWinner()) {
+      if (game.hasWinner() && game.isNoTeams()) {
+        boolean leftTeam = game.getWinnerId() == 0;
+        int prevGameIndex = getPrevGameIndex(roundIndex, i, leftTeam);
+        if (leftTeam) {
+          game.setTeam1(rounds.get(roundIndex - 1).getGames().get(prevGameIndex).getWinner());
+          game.setScore(new Integer[] {0, null});
+        } else {
+          game.setTeam2(rounds.get(roundIndex - 1).getGames().get(prevGameIndex).getWinner());
+          game.setScore(new Integer[] {null, 0});
+        }
+      } else if (!game.hasWinner()) {
         if (game.getTeam1() == null) {
           int prevGameIndex = getPrevGameIndex(roundIndex, i, true);
           if (prevGameIndex != -1) {

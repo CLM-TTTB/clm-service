@@ -252,17 +252,6 @@ public class Game implements IRank, IPatchSubject {
 
   @Override
   public String toString() {
-    return "Game: "
-        + this.id
-        + " "
-        + (this.teams.hasFirst()
-            ? this.teams.getFirst().getName() + " " + this.teams.getFirst().getRank()
-            : "team 1 null")
-        + " vs "
-        + (this.teams.hasSecond()
-            ? this.teams.getSecond().getName() + " " + this.teams.getSecond().getRank()
-            : "team 2 null")
-        + " "
-        + this.winnerId;
+    return "Game: " + this.id + " score: [" + this.getScore()[0] + " - " + this.getScore()[1] + "]";
   }
 }
