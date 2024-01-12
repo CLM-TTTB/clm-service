@@ -5,7 +5,6 @@ import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.interfaces.IPatchSubject;
 import com.clm.api.interfaces.IRank;
 import com.clm.api.interfaces.IRankObserver;
-import com.clm.api.user.Swapper;
 import com.clm.api.utils.DuplicatePair;
 import com.clm.api.utils.SH256Hasher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,7 +41,7 @@ public class Game implements IRank, IPatchSubject {
   private DuplicatePair<TeamTracker> teams;
   private String id;
 
-  @Transient private final List<IRankObserver> observers = new ArrayList<>();
+  @JsonIgnore @Transient private final List<IRankObserver> observers = new ArrayList<>();
 
   private Instant rankingTime;
 
@@ -66,17 +65,17 @@ public class Game implements IRank, IPatchSubject {
     this.previousGameIds = new LinkedHashSet<>();
   }
 
-  public Game(DuplicatePair<TeamTracker> teams, int winnerId) {
-    this(teams, null, winnerId);
-  }
+  // public Game(DuplicatePair<TeamTracker> teams, int winnerId) {
+  //   this(teams, null, winnerId);
+  // }
 
-  public Game(DuplicatePair<TeamTracker> teams, String gameId, int winnerId) {
-    this.teams = teams;
-    this.id = gameId;
-    this.injuryTimeMs = 0;
-    this.previousGameIds = new LinkedHashSet<>();
-    setWinner(winnerId);
-  }
+  // public Game(DuplicatePair<TeamTracker> teams, String gameId, int winnerId) {
+  //   this.teams = teams;
+  //   this.id = gameId;
+  //   this.injuryTimeMs = 0;
+  //   this.previousGameIds = new LinkedHashSet<>();
+  //   setWinner(winnerId);
+  // }
 
   public Game(
       DuplicatePair<TeamTracker> teams, int winnerId, int winnerGoalsFor, int winnerGoalsAgainst) {
@@ -181,7 +180,7 @@ public class Game implements IRank, IPatchSubject {
         notifyObservers();
       } else throw new NotFoundException("id must be 0 or 1");
     } else {
-      if (id == 0 || id == 1) {
+      if (winnerId != id && (id != 0 || id == 1)) {
         winnerId = id;
         if (teams.has(id)) {
           teams.get(id).setGoalsFor(goalsFor);
@@ -189,7 +188,9 @@ public class Game implements IRank, IPatchSubject {
           if (teams.has(1 - id)) {
             teams.get(1 - id).setGoalsFor(goalsAgainst);
             teams.get(1 - id).setGoalDifference(goalsAgainst - goalsFor);
-            Swapper.swap(teams.get(1 - id).getRank(), teams.get(id).getRank());
+            int rankFirst = teams.get(id).getRank();
+            teams.get(id).setRank(teams.get(1 - id).getRank());
+            teams.get(1 - id).setRank(rankFirst);
             return;
           }
         }
@@ -199,7 +200,9 @@ public class Game implements IRank, IPatchSubject {
           if (teams.has(id)) {
             teams.get(id).setGoalsFor(goalsFor);
             teams.get(id).setGoalDifference(goalsFor - goalsAgainst);
-            Swapper.swap(teams.get(1 - id).getRank(), teams.get(id).getRank());
+            int rankFirst = teams.get(id).getRank();
+            teams.get(id).setRank(teams.get(1 - id).getRank());
+            teams.get(1 - id).setRank(rankFirst);
             return;
           }
         }

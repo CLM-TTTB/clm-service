@@ -40,6 +40,16 @@ public class GameController {
       @RequestParam int winnerGoalsFor,
       @RequestParam int winnerGoalsAgainst,
       Principal principal) {
+    if (winnerGoalsFor < 0 || winnerGoalsAgainst < 0) {
+      throw new IllegalArgumentException("Goals must be positive");
+    } else if (winnerGoalsFor != 0
+        && winnerGoalsAgainst != 0
+        && winnerGoalsFor == winnerGoalsAgainst) {
+      throw new IllegalArgumentException("Goals must be different");
+    } else if (winnerGoalsFor < winnerGoalsAgainst) {
+      throw new IllegalArgumentException("Goals for must be greater than goals against");
+    }
+
     return ResponseEntity.ok(
         gameService.updateStats(
             tournamentId, gameId, teamId, winnerGoalsFor, winnerGoalsAgainst, principal));

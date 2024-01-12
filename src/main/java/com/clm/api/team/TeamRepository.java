@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TeamRepository extends MongoRepository<Team, String> {
 
+  List<Team> findAllById(List<String> ids);
+
   Optional<Team> findByIdAndCreatorId(String id, String creatorId);
 
   Page<Team> findByTournamentIdAndStatus(

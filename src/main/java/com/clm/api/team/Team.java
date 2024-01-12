@@ -34,7 +34,9 @@ public class Team implements IPatchSubject {
 
   @Override
   public String[] getIgnoredFields() {
-    return new String[] {"id", "creatorId", "tournamentId", "status", "createdAt", "updatedAt"};
+    return new String[] {
+      "id", "creatorId", "tournamentId", "status", "createdAt", "updatedAt", "previousGameIds"
+    };
   }
 
   @Transient private static final long serialVersionUID = 1L;

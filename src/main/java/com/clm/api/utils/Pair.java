@@ -75,12 +75,12 @@ public class Pair<F, S> implements IPair<F, S> {
 
   @Override
   public boolean hasSecond() {
-    return second != null;
+    return this.second != null;
   }
 
   @Override
   public S getSecond() {
-    return second;
+    return this.second;
   }
 
   @Override

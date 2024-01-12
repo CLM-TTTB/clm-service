@@ -9,8 +9,8 @@ public class DuplicatePair<T> extends Pair<T, T> {
 
   @Override
   public T get(int index) {
-    if (index == 0) return first;
-    else if (index == 1) return second;
+    if (index == 0) return this.first;
+    else if (index == 1) return this.second;
     else throw new IndexOutOfBoundsException();
   }
 }

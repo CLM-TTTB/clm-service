@@ -1,7 +1,6 @@
 package com.clm.api.game;
 
 import com.clm.api.interfaces.IRank;
-import com.clm.api.user.Swapper;
 
 public class KnockOutTeamTracker extends TeamTracker {
 
@@ -26,11 +25,14 @@ public class KnockOutTeamTracker extends TeamTracker {
       if (game.isEnoughTeams()) {
         if (game.getWinner().getRank().equals(game.getLoser().getRank())) {
           game.getLoser().setRank(game.getLoser().getRank() + 1);
-        } else {
-          Swapper.swap(game.getWinner().getRank(), game.getLoser().getRank());
+        } else if (game.getWinner().getRank() > game.getLoser().getRank()) {
+          int winnerRank = game.getWinner().getRank();
+          game.getWinner().setRank(game.getLoser().getRank());
+          game.getLoser().setRank(winnerRank);
         }
       }
       if (game.getWinner().getId().equals(this.getId())) return;
+
       if (game.getLoser().getId().equals(this.getId())) return;
 
       if (this.rank.equals(game.getWinner().getRank())) {

@@ -107,6 +107,13 @@ public class GameServiceImpl implements GameService {
         (game, gameTracker) -> {
           game.attach(gameTracker.getTeams());
           game.setWinner(winnerTeamId, winnerGoalsFor, winnerGoalsAgainst);
+          for (TeamTracker teamTracker : gameTracker.getTeams()) {
+            if (teamTracker.getId().equals(game.getWinner().getId())) {
+              teamTracker.setRank(game.getWinner().getRank());
+            } else if (teamTracker.getId().equals(game.getLoser().getId())) {
+              teamTracker.setRank(game.getLoser().getRank());
+            }
+          }
           return game;
         },
         connectedUser);
