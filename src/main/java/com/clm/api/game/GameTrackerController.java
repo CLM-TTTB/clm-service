@@ -2,6 +2,7 @@ package com.clm.api.game;
 
 import java.security.Principal;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameTrackerController {
 
   public final GameTrackerService gameTrackerService;
+
+  @GetMapping("/{tournamentId}")
+  public ResponseEntity<?> getGameFlatList(@PathVariable("tournamentId") String tournamentId) {
+    return ResponseEntity.ok(gameTrackerService.getGameFlatList(tournamentId));
+  }
+
+  @GetMapping("/tree/{tournamentId}")
+  public ResponseEntity<?> getSchedule(@PathVariable("tournamentId") String tournamentId) {
+    return ResponseEntity.ok(gameTrackerService.get(tournamentId));
+  }
 
   @PostMapping("/tree/{tournamentId}")
   public ResponseEntity<?> scheduleGames(

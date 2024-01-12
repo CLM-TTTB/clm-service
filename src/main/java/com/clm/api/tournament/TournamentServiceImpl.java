@@ -244,6 +244,8 @@ public class TournamentServiceImpl implements TournamentService {
     User user = PrincipalHelper.getUser(connectedUser);
     if (!tournament.getCreatorId().equals(user.getId())) {
       throw new NotFoundException("You are not the creator of this tournament");
+    } else if (tournament.getStatus() != Tournament.Status.UPCOMING) {
+      throw new InvalidException("Tournament is going on or finished");
     }
 
     Team team =

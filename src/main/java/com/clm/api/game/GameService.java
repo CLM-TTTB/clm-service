@@ -9,6 +9,15 @@ public interface GameService {
 
   Game get(String tournamentId, String gameId) throws NotFoundException;
 
+  Game updateStats(
+      String tournamentId,
+      String gameId,
+      String winnerTeamId,
+      int winnerGoalsFor,
+      int winnerGoalsAgainst,
+      Principal connectedUser)
+      throws NotFoundException;
+
   Game patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,

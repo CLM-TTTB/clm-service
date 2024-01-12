@@ -6,6 +6,10 @@ import java.util.List;
 /** GameTrackerService */
 public interface GameTrackerService {
 
+  GameTracker get(String tournamentId);
+
+  List<Game> getGameFlatList(String tournamentId);
+
   GameTracker schedule(String tournamentId, Integer maxTeamPerTable, Principal connectedUser);
 
   List<Game> scheduleAndGetGameFlatList(

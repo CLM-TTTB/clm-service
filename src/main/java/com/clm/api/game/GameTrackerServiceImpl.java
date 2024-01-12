@@ -20,6 +20,19 @@ public class GameTrackerServiceImpl implements GameTrackerService {
   private final TournamentRepository tournamentRepository;
 
   @Override
+  public GameTracker get(String tournamentId) {
+    return gameTrackerRepository
+        .findByTournamentId(tournamentId)
+        .orElseThrow(() -> new NotFoundException("Game Tracker not found for this tournament"));
+  }
+
+  @Override
+  public List<Game> getGameFlatList(String tournamentId) {
+    GameTracker gameTracker = get(tournamentId);
+    return gameTracker.getGames();
+  }
+
+  @Override
   public GameTracker schedule(
       String tournamentId, Integer maxTeamPerTable, Principal connectedUser) {
     User user = PrincipalHelper.getUser(connectedUser);

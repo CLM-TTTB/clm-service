@@ -22,19 +22,38 @@ public class KnockOutTeamTracker extends TeamTracker {
   public void update(IRank subscriber) {
     Game game = (Game) subscriber;
     if (game.hasWinner()) {
+
       if (game.isEnoughTeams()) {
-        if (game.getWinner().getRank() == game.getLoser().getRank()) {
+        if (game.getWinner().getRank().equals(game.getLoser().getRank())) {
           game.getLoser().setRank(game.getLoser().getRank() + 1);
         } else {
           Swapper.swap(game.getWinner().getRank(), game.getLoser().getRank());
         }
       }
-      if (game.getWinner().getId() == this.getId()) return;
-      if (game.getLoser().getId() == this.getId()) return;
+      if (game.getWinner().getId().equals(this.getId())) return;
+      if (game.getLoser().getId().equals(this.getId())) return;
 
-      if (this.rank == game.getWinner().getRank()) {
+      if (this.rank.equals(game.getWinner().getRank())) {
         game.getLoser().setRank(game.getLoser().getRank() + 1);
       }
     }
+  }
+
+  @Override
+  public void win(TeamTracker loser, int goalsFor, int goalsAgainst) {
+    this.goalsFor = goalsFor;
+    this.goalDifference += goalsFor - goalsAgainst;
+  }
+
+  @Override
+  public void lose(TeamTracker winner, int goalsFor, int goalsAgainst) {
+    this.goalsFor = goalsFor;
+    this.goalDifference += goalsFor - goalsAgainst;
+  }
+
+  @Override
+  public void draw(TeamTracker opponent, int goalsFor, int goalsAgainst) {
+    this.goalsFor = goalsFor;
+    this.goalDifference += goalsFor - goalsAgainst;
   }
 }

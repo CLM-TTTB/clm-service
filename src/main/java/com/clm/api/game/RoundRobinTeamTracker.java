@@ -46,4 +46,24 @@ public class RoundRobinTeamTracker extends TeamTracker {
       }
     }
   }
+
+  @Override
+  public void win(TeamTracker loser, int goalsFor, int goalsAgainst) {
+    score += 3;
+    this.goalsFor = goalsFor;
+    this.goalDifference += goalsFor - goalsAgainst;
+  }
+
+  @Override
+  public void lose(TeamTracker winner, int goalsFor, int goalsAgainst) {
+    this.goalsFor = goalsFor;
+    this.goalDifference += goalsFor - goalsAgainst;
+  }
+
+  @Override
+  public void draw(TeamTracker opponent, int goalsFor, int goalsAgainst) {
+    score++;
+    this.goalsFor = goalsFor;
+    this.goalDifference += goalsFor - goalsAgainst;
+  }
 }

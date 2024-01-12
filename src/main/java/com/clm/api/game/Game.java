@@ -1,8 +1,11 @@
 package com.clm.api.game;
 
+import com.clm.api.exceptions.business.InvalidException;
+import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.interfaces.IPatchSubject;
 import com.clm.api.interfaces.IRank;
 import com.clm.api.interfaces.IRankObserver;
+import com.clm.api.user.Swapper;
 import com.clm.api.utils.DuplicatePair;
 import com.clm.api.utils.SH256Hasher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,6 +35,7 @@ public class Game implements IRank, IPatchSubject {
       "previousGameIds",
       "observers",
       "teams",
+      "winnerId"
     };
   }
 
@@ -72,6 +76,24 @@ public class Game implements IRank, IPatchSubject {
     this.injuryTimeMs = 0;
     this.previousGameIds = new LinkedHashSet<>();
     setWinner(winnerId);
+  }
+
+  public Game(
+      DuplicatePair<TeamTracker> teams, int winnerId, int winnerGoalsFor, int winnerGoalsAgainst) {
+    this(teams, null, winnerId, winnerGoalsFor, winnerGoalsAgainst);
+  }
+
+  public Game(
+      DuplicatePair<TeamTracker> teams,
+      String gameId,
+      int winnerId,
+      int winnerGoalsFor,
+      int winnerGoalsAgainst) {
+    this.teams = teams;
+    this.id = gameId;
+    this.injuryTimeMs = 0;
+    this.previousGameIds = new LinkedHashSet<>();
+    setWinner(winnerId, winnerGoalsFor, winnerGoalsAgainst);
   }
 
   public void saveHistory() {
@@ -131,24 +153,79 @@ public class Game implements IRank, IPatchSubject {
     if (team == null) return;
     else if (team.equals(teams.getFirst())) setWinner(0);
     else if (team.equals(teams.getSecond())) setWinner(1);
-    else throw new IllegalArgumentException("team must be one of the two teams");
+    else throw new NotFoundException("team must be one of the two teams");
   }
 
   public void setWinner(Integer id) {
-    if (id == 0 || id == 1) {
-      System.out.println("winner");
-      winnerId = id;
-      if (teams.has(id)) teams.get(id).win();
-      if (teams.has(1 - id)) teams.get(1 - id).lose();
-      this.rankingTime = Instant.now();
-      notifyObservers();
-    } else throw new IllegalArgumentException("id must be 0 or 1");
+    if (winnerId == -1) {
+      if (id == 0 || id == 1) {
+        winnerId = id;
+        if (teams.has(id)) teams.get(id).win();
+        if (teams.has(1 - id)) teams.get(1 - id).lose();
+        this.rankingTime = Instant.now();
+        notifyObservers();
+      } else throw new NotFoundException("id must be 0 or 1");
+    }
+  }
+
+  public void setWinner(Integer id, int goalsFor, int goalsAgainst) {
+    if (goalsFor < goalsAgainst)
+      throw new InvalidException("goalsFor must be greater than goalsAgainst");
+
+    if (winnerId == -1) {
+      if (id == 0 || id == 1) {
+        winnerId = id;
+        if (teams.has(id)) teams.get(id).win(teams.get(1 - id), goalsFor, goalsAgainst);
+        if (teams.has(1 - id)) teams.get(1 - id).lose(teams.get(id), goalsAgainst, goalsFor);
+        this.rankingTime = Instant.now();
+        notifyObservers();
+      } else throw new NotFoundException("id must be 0 or 1");
+    } else {
+      if (id == 0 || id == 1) {
+        winnerId = id;
+        if (teams.has(id)) {
+          teams.get(id).setGoalsFor(goalsFor);
+          teams.get(id).setGoalDifference(goalsFor - goalsAgainst);
+          if (teams.has(1 - id)) {
+            teams.get(1 - id).setGoalsFor(goalsAgainst);
+            teams.get(1 - id).setGoalDifference(goalsAgainst - goalsFor);
+            Swapper.swap(teams.get(1 - id).getRank(), teams.get(id).getRank());
+            return;
+          }
+        }
+        if (teams.has(1 - id)) {
+          teams.get(1 - id).setGoalsFor(goalsAgainst);
+          teams.get(1 - id).setGoalDifference(goalsAgainst - goalsFor);
+          if (teams.has(id)) {
+            teams.get(id).setGoalsFor(goalsFor);
+            teams.get(id).setGoalDifference(goalsFor - goalsAgainst);
+            Swapper.swap(teams.get(1 - id).getRank(), teams.get(id).getRank());
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  public void setWinner(String id, int goalsFor, int goalsAgainst) {
+    if (teams.getFirst() != null && id.equals(teams.getFirst().getId()))
+      setWinner(0, goalsFor, goalsAgainst);
+    else if (teams.getSecond() != null && id.equals(teams.getSecond().getId()))
+      setWinner(1, goalsFor, goalsAgainst);
+    else throw new NotFoundException("id must be one of the two team ids");
+  }
+
+  public void setWinner(TeamTracker team, int goalsFor, int goalsAgainst) {
+    if (team == null) return;
+    else if (team.equals(teams.getFirst())) setWinner(0, goalsFor, goalsAgainst);
+    else if (team.equals(teams.getSecond())) setWinner(1, goalsFor, goalsAgainst);
+    else throw new NotFoundException("team must be one of the two teams");
   }
 
   public void setWinner(String id) {
     if (teams.getFirst() != null && id.equals(teams.getFirst().getId())) setWinner(0);
     else if (teams.getSecond() != null && id.equals(teams.getSecond().getId())) setWinner(1);
-    else throw new IllegalArgumentException("id must be one of the two team ids");
+    else throw new NotFoundException("id must be one of the two team ids");
   }
 
   @JsonIgnore
@@ -185,8 +262,19 @@ public class Game implements IRank, IPatchSubject {
   }
 
   @Override
+  public void attach(List<? extends IRankObserver> observers) {
+    this.observers.clear();
+    this.observers.addAll(observers);
+  }
+
+  @Override
   public void detach(IRankObserver observer) {
     this.observers.remove(observer);
+  }
+
+  @Override
+  public void detachAll() {
+    this.observers.clear();
   }
 
   @Override
@@ -203,6 +291,17 @@ public class Game implements IRank, IPatchSubject {
 
   @Override
   public String toString() {
-    return "Game []";
+    return "Game: "
+        + this.id
+        + " "
+        + (this.teams.hasFirst()
+            ? this.teams.getFirst().getName() + " " + this.teams.getFirst().getRank()
+            : "team 1 null")
+        + " vs "
+        + (this.teams.hasSecond()
+            ? this.teams.getSecond().getName() + " " + this.teams.getSecond().getRank()
+            : "team 2 null")
+        + " "
+        + this.winnerId;
   }
 }

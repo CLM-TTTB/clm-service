@@ -45,7 +45,7 @@ public class KnockOutGameTracker extends GameTracker {
     if (numberOfTeams % 2 != 0) {
       val teamTrackers = new DuplicatePair<>(teams.get(numberOfTeams - 1), null);
 
-      games.add(new Game(teamTrackers, 0));
+      games.add(new Game(teamTrackers, 0, 0, 0));
     }
 
     rounds.add(new Round(games));
@@ -73,7 +73,7 @@ public class KnockOutGameTracker extends GameTracker {
         val teamTrackers =
             new DuplicatePair<>(prevRoundGames.get(numberOfPrevGames - 1).getWinner(), null);
 
-        nextRoundGames.add(new Game(teamTrackers, 0));
+        nextRoundGames.add(new Game(teamTrackers, 0, 0, 0));
       }
 
       return rounds.add(new Round(nextRoundGames));

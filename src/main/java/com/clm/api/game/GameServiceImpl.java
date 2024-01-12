@@ -6,10 +6,10 @@ import com.clm.api.utils.PrincipalHelper;
 import java.lang.reflect.Field;
 import java.security.Principal;
 import java.util.Map;
+import java.util.function.BiFunction;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
-/** GameServiceImpl */
 @Service
 @lombok.RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
@@ -53,6 +53,7 @@ public class GameServiceImpl implements GameService {
     }
   }
 
+  @Override
   public Game get(String tournamentId, String gameId) {
     GameTracker gameTracker =
         gameTrackerRepository
@@ -66,9 +67,48 @@ public class GameServiceImpl implements GameService {
     if (game == null) {
       throw new NotFoundException("Game not found. Please check if game is white visit");
     }
-    game.setWinner(0);
-    gameTrackerRepository.save(gameTracker);
-
     return game;
+  }
+
+  private Game update(
+      String tournamentId,
+      String gameId,
+      BiFunction<Game, GameTracker, Game> updateFunction,
+      Principal connectedUser) {
+    User user = PrincipalHelper.getUser(connectedUser);
+    GameTracker gameTracker =
+        gameTrackerRepository
+            .findByTournamentIdAndCreatorId(tournamentId, user.getId())
+            .orElseThrow(() -> new NotFoundException("No game tracker found for this tournament"));
+
+    Game game = gameTracker.getGame(gameId);
+    if (game == null) {
+      throw new NotFoundException("Game not found. Please check if game is white visit");
+    }
+
+    Game gameUpdated = updateFunction.apply(game, gameTracker);
+    gameTrackerRepository.save(gameTracker);
+    return gameUpdated;
+  }
+
+  @Override
+  public Game updateStats(
+      String tournamentId,
+      String gameId,
+      String winnerTeamId,
+      int winnerGoalsFor,
+      int winnerGoalsAgainst,
+      Principal connectedUser)
+      throws NotFoundException {
+
+    return update(
+        tournamentId,
+        gameId,
+        (game, gameTracker) -> {
+          game.attach(gameTracker.getTeams());
+          game.setWinner(winnerTeamId, winnerGoalsFor, winnerGoalsAgainst);
+          return game;
+        },
+        connectedUser);
   }
 }
