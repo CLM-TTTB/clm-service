@@ -95,6 +95,7 @@ public class AuthServiceImpl implements AuthService {
         .name(user.getName())
         .avatar(user.getAvatar())
         .tokenType(TokenType.BEARER)
+        .phoneNo(user.getPhoneNo())
         .build();
   }
 

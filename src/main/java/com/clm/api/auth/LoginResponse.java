@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class LoginResponse {
   private String name;
   private String avatar;
+  private String phoneNo;
 
   private String accessToken;
   private String refreshToken;
