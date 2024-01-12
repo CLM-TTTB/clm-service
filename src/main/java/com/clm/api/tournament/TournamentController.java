@@ -60,6 +60,7 @@ public class TournamentController {
               "creatorId",
               "totalEnrolledTeams",
               "totalAcceptedTeams",
+              "acceptedTeams",
               "createdAt",
               "updatedAt"
             },

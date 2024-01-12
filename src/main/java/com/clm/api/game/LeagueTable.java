@@ -6,10 +6,10 @@ import java.util.List;
 /** LeagueTable */
 @lombok.Getter
 @lombok.Setter
-public class LeagueTable {
+public class LeagueTable<T> {
 
   private String name;
-  private List<String> teamIds;
+  private List<T> teams;
 
   public LeagueTable() {
     this(null, new ArrayList<>());
@@ -19,14 +19,14 @@ public class LeagueTable {
     this(index, new ArrayList<>());
   }
 
-  public LeagueTable(int index, List<String> teamIds) {
+  public LeagueTable(int index, List<T> teamIds) {
     generateName(index);
-    this.teamIds = teamIds;
+    this.teams = teamIds;
   }
 
-  public LeagueTable(String name, List<String> teamIds) {
+  public LeagueTable(String name, List<T> teamIds) {
     this.name = name;
-    this.teamIds = teamIds;
+    this.teams = teamIds;
   }
 
   public void generateName(int index) {

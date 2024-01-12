@@ -242,11 +242,6 @@ public class TournamentServiceImpl implements TournamentService {
             .findById(tournamentId)
             .orElseThrow(() -> new NotFoundException("Tournament not found"));
 
-    if (tournament.isFull()) {
-      throw new TeamRegistrationFailedException(
-          TeamRegistrationFailedException.Reason.MAX_TEAMS_REACHED);
-    }
-
     User user = PrincipalHelper.getUser(connectedUser);
     if (!tournament.getCreatorId().equals(user.getId())) {
       throw new NotFoundException("You are not the creator of this tournament");
@@ -257,19 +252,23 @@ public class TournamentServiceImpl implements TournamentService {
 
     if (!team.getTournamentId().equals(tournamentId)) {
       throw new NotFoundException("Team not found in this tournament");
-    } else if (!tournament.isEnoughPlayersPerTeam(team.getMembers())) {
-      throw new TeamRegistrationFailedException(
-          TeamRegistrationFailedException.Reason.TEAM_TOO_SMALL);
-    } else if (tournament.isExceedPlayersPerTeam(team.getMembers())) {
-      throw new TeamRegistrationFailedException(
-          TeamRegistrationFailedException.Reason.TEAM_TOO_BIG);
     }
 
     if (accepted) {
-      tournament.acceptTeam(team.getId());
+      if (tournament.isFull()) {
+        throw new TeamRegistrationFailedException(
+            TeamRegistrationFailedException.Reason.MAX_TEAMS_REACHED);
+      } else if (!tournament.isEnoughPlayersPerTeam(team.getMembers())) {
+        throw new TeamRegistrationFailedException(
+            TeamRegistrationFailedException.Reason.TEAM_TOO_SMALL);
+      } else if (tournament.isExceedPlayersPerTeam(team.getMembers())) {
+        throw new TeamRegistrationFailedException(
+            TeamRegistrationFailedException.Reason.TEAM_TOO_BIG);
+      }
+      tournament.acceptTeam(team);
       team.setStatus(Team.Status.ACCEPTED);
     } else {
-      tournament.rejectTeam(team.getId());
+      tournament.rejectTeam(team);
       team.setStatus(Team.Status.REFUSED);
     }
 

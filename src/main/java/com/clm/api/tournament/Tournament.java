@@ -5,6 +5,9 @@ import com.clm.api.constants.message.ErrorMessage;
 import com.clm.api.enums.AgeGroup;
 import com.clm.api.enums.CompetitionType;
 import com.clm.api.enums.Visibility;
+import com.clm.api.game.KnockOutTeamTracker;
+import com.clm.api.game.TeamTracker;
+import com.clm.api.team.Team;
 import com.clm.api.team.member.TeamMember;
 import com.clm.api.team.member.player.Player;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -91,7 +94,7 @@ public class Tournament {
 
   @lombok.Builder.Default private int totalEnrolledTeams = 0;
 
-  @JsonIgnore @lombok.Builder.Default private Set<String> acceptedTeamIds = new HashSet<>();
+  @JsonIgnore @lombok.Builder.Default private Set<TeamTracker> acceptedTeams = new HashSet<>();
 
   @lombok.Builder.Default private int totalAcceptedTeams = 0;
 
@@ -113,7 +116,7 @@ public class Tournament {
     this.totalAcceptedTeams = 0;
     this.viewOnly = false;
     this.cancelled = false;
-    this.acceptedTeamIds = new HashSet<>();
+    this.acceptedTeams = new HashSet<>();
   }
 
   public boolean isEnoughPlayersPerTeam(List<TeamMember> members) {
@@ -147,14 +150,14 @@ public class Tournament {
     this.startTime = Instant.now();
   }
 
-  public void acceptTeam(String teamId) {
-    if (acceptedTeamIds.add(teamId)) {
+  public void acceptTeam(Team team) {
+    if (acceptedTeams.add(new KnockOutTeamTracker(team.getId(), team.getName()))) {
       totalAcceptedTeams++;
     }
   }
 
-  public void rejectTeam(String teamId) {
-    if (acceptedTeamIds.remove(teamId)) {
+  public void rejectTeam(Team team) {
+    if (acceptedTeams.removeIf((teamTracker) -> teamTracker.getId().equals(team.getId()))) {
       totalAcceptedTeams = totalAcceptedTeams > 0 ? totalAcceptedTeams - 1 : 0;
     }
   }

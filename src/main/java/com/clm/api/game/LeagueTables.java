@@ -1,12 +1,10 @@
 package com.clm.api.game;
 
-import com.clm.api.interfaces.IIdTracker;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** LeagueTables */
-public class LeagueTables extends ArrayList<LeagueTable> {
+public class LeagueTables<T> extends ArrayList<LeagueTable<T>> {
 
   private static final long serialVersionUID = 1L;
 
@@ -18,27 +16,17 @@ public class LeagueTables extends ArrayList<LeagueTable> {
     super(initialCapacity);
   }
 
-  public LeagueTables(List<LeagueTable> tables) {
+  public LeagueTables(List<LeagueTable<T>> tables) {
     super(tables);
   }
 
-  public LeagueTables(LeagueTables tables) {
+  public LeagueTables(LeagueTables<T> tables) {
     super(tables);
   }
 
-  public LeagueTables(LeagueTable table) {
+  public LeagueTables(LeagueTable<T> table) {
     super();
     add(table);
-  }
-
-  public List<String> getTeamIds() {
-    return this.stream().map(LeagueTable::getTeamIds).flatMap(List::stream).toList();
-  }
-
-  public static LeagueTables fromIIdTrackerList(
-      List<IIdTracker<String>> teamIds, int teamsPerTable) {
-    List<String> ids = teamIds.stream().map(IIdTracker::getId).toList();
-    return from(ids, teamsPerTable);
   }
 
   /**
@@ -53,12 +41,12 @@ public class LeagueTables extends ArrayList<LeagueTable> {
    *
    * <p>Tables: { 0: [0, 1, 2, 3] 1: [4, 5, 6, 7] 2: [8, 9] }
    *
-   * @param teamIds list of team ids
+   * @param teams list of teams
    * @param teamsPerTable number of teams per table
    * @return league tables
    */
-  public static LeagueTables from(List<String> teamIds, int teamsPerTable) {
-    int size = teamIds.size();
+  public static <T> LeagueTables<T> from(List<T> teams, int teamsPerTable) {
+    int size = teams.size();
 
     if (size < 2) {
       throw new IllegalArgumentException("At least 2 teams are required");
@@ -71,7 +59,7 @@ public class LeagueTables extends ArrayList<LeagueTable> {
     }
 
     if (teamsPerTable == size) {
-      return new LeagueTables(new LeagueTable(0, new ArrayList<>(teamIds)));
+      return new LeagueTables<T>(new LeagueTable<T>(0, new ArrayList<>(teams)));
     }
 
     // min teams per table = 50 % of teams per table
@@ -80,16 +68,16 @@ public class LeagueTables extends ArrayList<LeagueTable> {
     int minTeamsPerTable = teamsPerTable / 2 + 1;
 
     // Draw lots to determine which team will play in which table
-    List<String> shuffledTeamIds = new ArrayList<>(teamIds);
+    List<T> shuffledTeamIds = new ArrayList<>(teams);
     Collections.shuffle(shuffledTeamIds);
 
-    LeagueTables tables = new LeagueTables();
+    LeagueTables<T> tables = new LeagueTables<>();
     int tableIndex = 0;
 
     while (size >= minTeamsPerTable) {
       int subListSize = Math.min(size, teamsPerTable);
       tables.add(
-          new LeagueTable(
+          new LeagueTable<>(
               tableIndex++, new ArrayList<>(shuffledTeamIds.subList(size - subListSize, size))));
       size -= subListSize;
     }
@@ -99,7 +87,7 @@ public class LeagueTables extends ArrayList<LeagueTable> {
       if (tableIndex == numberOfTables) {
         tableIndex = 0;
       }
-      tables.get(tableIndex++).getTeamIds().add(shuffledTeamIds.get(--size));
+      tables.get(tableIndex++).getTeams().add(shuffledTeamIds.get(--size));
     }
 
     return tables;

@@ -1,10 +1,7 @@
 package com.clm.api.game;
 
-import com.clm.api.game.Game.TeamTracker;
 import com.clm.api.interfaces.IIdTracker;
-import com.clm.api.utils.DuplicatePair;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.beans.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,13 +11,23 @@ import java.util.stream.Collectors;
 @lombok.AllArgsConstructor
 public class Round {
   private List<Game> games;
+  private List<Game> extraGames;
 
   public Round() {
-    this(new ArrayList<>());
+    this(new ArrayList<>(), new ArrayList<>());
+  }
+
+  public Round(List<Game> games) {
+    this.games = games;
+    this.extraGames = new ArrayList<>();
   }
 
   public void addGame(Game game) {
     games.add(game);
+  }
+
+  public void addExtraGame(Game game) {
+    extraGames.add(game);
   }
 
   public boolean isFinal() {
@@ -43,14 +50,13 @@ public class Round {
     return games.size() == 16;
   }
 
-  public void addGame(DuplicatePair<TeamTracker> teams) {
-    games.add(new Game(teams));
-  }
-
-  @Transient
   @JsonIgnore
   public Game getGame(int index) {
     return games.get(index);
+  }
+
+  public Game getExtraGame(int index) {
+    return extraGames.get(index);
   }
 
   public boolean isFinished() {

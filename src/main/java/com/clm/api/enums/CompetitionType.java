@@ -7,5 +7,5 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public enum CompetitionType {
   KNOCKOUT,
   ROUND_ROBIN,
-  ROUND_ROBIN_WITH_KNOCKOUT;
+  KNOCKOUT_WITH_ROUND_ROBIN;
 }

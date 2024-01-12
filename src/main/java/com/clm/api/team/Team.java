@@ -21,8 +21,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 /** Team */
 @lombok.Getter
 @lombok.Setter
-@lombok.Builder
-@lombok.AllArgsConstructor
+@lombok.experimental.SuperBuilder
 @Document(collection = "teams")
 public class Team {
 
@@ -83,6 +82,7 @@ public class Team {
   }
 
   public Team(TeamTemplate teamTemplate) {
+    // this();
     this.creatorId = teamTemplate.getCreatorId();
     this.name = teamTemplate.getTeamName();
     this.phoneNo = teamTemplate.getPhoneNo();
@@ -93,7 +93,6 @@ public class Team {
     this.status = Status.PENDING;
     this.uniforms = new ArrayList<>();
     this.previousGameIds = new LinkedList<>();
-    // trackPlayer();
   }
 
   public void trackPlayer() {

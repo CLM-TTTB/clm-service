@@ -1,5 +1,6 @@
 package com.clm.api.game;
 
+import com.clm.api.exceptions.business.InvalidException;
 import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.team.TeamRepository;
 import com.clm.api.tournament.Tournament;
@@ -8,7 +9,6 @@ import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +23,18 @@ public class GameTrackerServiceImpl implements GameTrackerService {
 
   @Override
   public GameTracker get(String id) throws NotFoundException {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'get'");
+    return gameTrackerRepository
+        .findById(id)
+        .orElseThrow(() -> new NotFoundException("Game Tracker not found"));
   }
 
   @Override
   public GameTracker create(GameTracker t, Principal connectedUser) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'create'");
   }
 
   @Override
   public GameTracker update(GameTracker t, Principal connectedUser) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'update'");
   }
 
@@ -56,31 +55,51 @@ public class GameTrackerServiceImpl implements GameTrackerService {
   }
 
   @Override
-  public GameTracker schedule(String tournamentId, Principal connectedUser) {
-    // TODO:
-    //
-    List<String> acceptedTeamIds =
-        List.of(
-            "team1", "team2", "team3", "team4", "team5", "team6", "team7", "team8", "team9",
-            "team10", "team11", "team12", "team13", "team14", "team15");
-
+  public GameTracker schedule(
+      String tournamentId, Integer maxTeamPerTable, Principal connectedUser) {
     User user = PrincipalHelper.getUser(connectedUser);
     Tournament tournament =
         tournamentRepository
             .findByIdAndCreatorId(tournamentId, user.getId())
             .orElseThrow(() -> new NotFoundException("Tournament not found"));
-    // List<Team> teams =
-    //     teamRepository
-    //         .findByTournamentId(tournamentId)
-    //         .orElseThrow(() -> new NotFoundException("Tournament not found"));
 
-    // GameTracker gameTracker =
-    //     new KnockOutGameTracker(tournamentId, new ArrayList<>(tournament.getAcceptedTeamIds()));
-    KnockOutGameTracker gameTracker =
-        new KnockOutGameTracker(tournamentId, new ArrayList<>(acceptedTeamIds));
-    // gameTracker.initFirstRound();
+    GameTracker gameTracker;
+    switch (tournament.getCompetitionType()) {
+      case KNOCKOUT:
+        gameTracker =
+            new KnockOutGameTracker(
+                tournamentId, user.getId(), new ArrayList<>(tournament.getAcceptedTeams()));
+        break;
+      case ROUND_ROBIN:
+        gameTracker =
+            new RoundRobinGameTracker(
+                tournamentId, user.getId(), new ArrayList<>(tournament.getAcceptedTeams()));
+
+        break;
+      case KNOCKOUT_WITH_ROUND_ROBIN:
+        gameTracker =
+            new KnockOutWithRoundRobinGameTracker(
+                tournamentId,
+                user.getId(),
+                new ArrayList<>(tournament.getAcceptedTeams()),
+                maxTeamPerTable != null ? maxTeamPerTable : 4);
+        break;
+      default:
+        throw new InvalidException("The competition type is not supported");
+    }
+
     gameTracker.createAllRounds();
+    return gameTrackerRepository.save(gameTracker);
+  }
 
+  @Override
+  public GameTracker refreshSchedule(String tournamentId, Principal connectedUser) {
+    GameTracker gameTracker =
+        gameTrackerRepository
+            .findByTournamentId(tournamentId)
+            .orElseThrow(() -> new NotFoundException("Tournament not found"));
+
+    gameTracker.updateAllRounds();
     return gameTracker;
   }
 }

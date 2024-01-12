@@ -59,24 +59,4 @@ public abstract class TeamMember {
     this.description = teamMember.getDescription();
     this.userId = teamMember.getUserId();
   }
-
-  // public TeamMember(String id, String name, Byte age) {
-  //   this.id = id;
-  //   this.name = name;
-  //   this.age = age;
-  //   this.image = "";
-  //   this.description = "";
-  // }
-
-  // public TeamMember(String id, String name, Byte age, String image, String description) {
-  //   this(id, name, age);
-  //   this.image = image;
-  //   this.description = description;
-  // }
-
-  // public TeamMember(
-  //     String id, String name, Byte age, String image, String description, String userId) {
-  //   this(id, name, age, image, description);
-  //   this.userId = userId;
-  // }
 }

@@ -1,27 +1,30 @@
 package com.clm.api.game;
 
 import com.clm.api.enums.CompetitionType;
-import com.clm.api.game.Game.TeamTracker;
-import com.clm.api.interfaces.IRoundMaker;
 import com.clm.api.utils.DuplicatePair;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import lombok.val;
 
 @lombok.Getter
 @lombok.Setter
-public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
-  // gameId = tournamentId + roundIndex + gameIndex + timestamp
+public class KnockOutGameTracker extends GameTracker {
 
   private LinkedList<Round> rounds;
 
-  public KnockOutGameTracker(String tournamentId, List<String> teamIds) {
-    super(tournamentId, teamIds, CompetitionType.KNOCKOUT);
-    if (teamIds == null || teamIds.size() < 2) {
-      throw new UnsupportedOperationException(
-          "Cannot create KnockOutGameTracker, not enough teams provided: " + teamIds.size());
-    }
+  public KnockOutGameTracker(String tournamentId, String creatorId, List<TeamTracker> teams) {
+    super(tournamentId, creatorId, teams, CompetitionType.KNOCKOUT);
+    validateTeamIds(teams);
     this.rounds = new LinkedList<>();
+  }
+
+  private void validateTeamIds(List<TeamTracker> teams) {
+    if (teams == null || teams.size() < 2) {
+      throw new UnsupportedOperationException(
+          "Cannot create KnockOutGameTracker, not enough teams provided: " + teams.size());
+    }
   }
 
   public boolean hasRound() {
@@ -29,61 +32,55 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
   }
 
   private void initFirstRound() {
-    Round firstRound = new Round();
-    ArrayList<Game> games = new ArrayList<>();
+    List<Game> games = new ArrayList<>();
 
-    int numberOfTeams = teamIds.size();
+    int numberOfTeams = teams.size();
 
     for (int i = 0; i < numberOfTeams - 1; i += 2) {
-      DuplicatePair<TeamTracker> teamTrackers =
-          new DuplicatePair<>(
-              new TeamTracker(teamIds.get(i), 0), new TeamTracker(teamIds.get(i + 1), 0));
+      val teamTrackers = new DuplicatePair<>(teams.get(i), teams.get(i + 1));
 
-      String gameId = Game.genGameId(this.getTournamentId(), 0, teamTrackers);
-      games.add(new Game(teamTrackers, gameId));
+      games.add(new Game(teamTrackers, this.getTournamentId()));
     }
 
     if (numberOfTeams % 2 != 0) {
-      DuplicatePair<TeamTracker> teamTrackers =
-          new DuplicatePair<>(new TeamTracker(teamIds.get(numberOfTeams - 1), 0), null);
+      val teamTrackers = new DuplicatePair<>(teams.get(numberOfTeams - 1), null);
 
-      String gameId = Game.genGameId(this.getTournamentId(), 0, teamTrackers);
-      games.add(new Game(teamTrackers, gameId, 0));
+      games.add(new Game(teamTrackers, 0));
     }
 
-    firstRound.setGames(games);
-
-    rounds.add(firstRound);
+    rounds.add(new Round(games));
   }
 
-  private void createNextRound() {
+  private boolean createNextRound() {
     if (hasRound()) {
-      rounds.add(new Round(createNextRoundGames(rounds.getLast().getGames())));
+      final Round lastRound = rounds.getLast();
+      if (lastRound.isFinal()) return false;
+
+      final List<Game> prevRoundGames = lastRound.getGames();
+
+      int numberOfPrevGames = prevRoundGames.size();
+
+      List<Game> nextRoundGames = new ArrayList<>();
+
+      for (int i = 0; i < numberOfPrevGames - 1; i += 2) {
+        val teamTrackers =
+            new DuplicatePair<>(
+                prevRoundGames.get(i).getWinner(), prevRoundGames.get(i + 1).getWinner());
+        nextRoundGames.add(new Game(teamTrackers, this.getTournamentId()));
+      }
+
+      if (numberOfPrevGames % 2 != 0) {
+        val teamTrackers =
+            new DuplicatePair<>(prevRoundGames.get(numberOfPrevGames - 1).getWinner(), null);
+
+        nextRoundGames.add(new Game(teamTrackers, 0));
+      }
+
+      return rounds.add(new Round(nextRoundGames));
     } else {
       initFirstRound();
+      return true;
     }
-  }
-
-  private List<Game> createNextRoundGames(List<Game> previousRoundGames) {
-    List<Game> nextRoundGames = new ArrayList<>();
-
-    int numberOfGames = previousRoundGames.size();
-    for (int i = 0; i < numberOfGames - 1; i += 2) {
-      DuplicatePair<TeamTracker> teamTrackers =
-          new DuplicatePair<>(
-              previousRoundGames.get(i).getWinner(), previousRoundGames.get(i + 1).getWinner());
-      String gameId = Game.genGameId(this.getTournamentId(), rounds.size() - 1, teamTrackers);
-      nextRoundGames.add(new Game(teamTrackers, gameId));
-    }
-
-    if (numberOfGames % 2 != 0) {
-      DuplicatePair<TeamTracker> teamTrackers =
-          new DuplicatePair<>(previousRoundGames.get(numberOfGames - 1).getWinner(), null);
-
-      String gameId = Game.genGameId(this.getTournamentId(), rounds.size() - 1, teamTrackers);
-      nextRoundGames.add(new Game(teamTrackers, gameId, 0));
-    }
-    return nextRoundGames;
   }
 
   public void updateRound(int roundIndex) {
@@ -99,30 +96,26 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
       Game game = games.get(i);
       if (!game.hasWinner()) {
         if (game.getTeam1() == null) {
-          int prevGameIndex = getThePreviousGameIndex(roundIndex, i, true);
-          game.setTeam1(rounds.get(roundIndex - 1).getGames().get(prevGameIndex).getWinner());
+          int prevGameIndex = getPrevGameIndex(roundIndex, i, true);
+          if (prevGameIndex != -1) {
+            game.setTeam1(rounds.get(roundIndex - 1).getGames().get(prevGameIndex).getWinner());
+          }
         }
         if (game.getTeam2() == null) {
-          int prevGameIndex = getThePreviousGameIndex(roundIndex, i, false);
-          game.setTeam2(rounds.get(roundIndex - 1).getGames().get(prevGameIndex).getWinner());
+          int prevGameIndex = getPrevGameIndex(roundIndex, i, false);
+          if (prevGameIndex != -1) {
+            game.setTeam2(rounds.get(roundIndex - 1).getGames().get(prevGameIndex).getWinner());
+          }
         }
-        if (game.isEnoughTeams() && game.getGameId() == null) {
-          game.setGameId(Game.genGameId(this.getTournamentId(), roundIndex, game.getTeams()));
+        if (game.isEnoughTeams() && game.getId() == null) {
+          game.setId(Game.genGameId(this.getTournamentId()));
         }
       }
     }
   }
 
-  public int getThePreviousGameIndex(int currRoundIndex, int gameIndex, boolean isLeftTeam) {
-    if (currRoundIndex < 1 || currRoundIndex > rounds.size() - 1) {
-      throw new IndexOutOfBoundsException(
-          "Cannot get previous game index, round index out of bounds: "
-              + currRoundIndex
-              + "bounds: "
-              + 1
-              + " - "
-              + (rounds.size() - 1));
-    }
+  public int getPrevGameIndex(int currRoundIndex, int gameIndex, boolean isLeftTeam) {
+    if (currRoundIndex < 1 || currRoundIndex > rounds.size() - 1) return -1;
 
     int currRoundGamesSize = rounds.get(currRoundIndex).getGames().size();
 
@@ -134,51 +127,67 @@ public class KnockOutGameTracker extends GameTracker implements IRoundMaker {
     return prevRoundGamesSize - (currRoundGamesSize - gameIndex) * 2 + leftOrRight;
   }
 
-  public int getThePreviousGameIndex(int currRoundIndex, String teamId) {
-    if (currRoundIndex < 1 || currRoundIndex > rounds.size() - 1) {
-      throw new IndexOutOfBoundsException(
-          "Cannot get previous game index, round index out of bounds: "
-              + currRoundIndex
-              + "bounds: "
-              + 1
-              + " - "
-              + (rounds.size() - 1));
-    }
+  public int getPrevGameIndex(int currRoundIndex, String teamId) {
+    if (currRoundIndex < 1 || currRoundIndex > rounds.size() - 1) return -1;
 
     List<Game> currRoundGames = rounds.get(currRoundIndex).getGames();
     int currRoundGamesSize = currRoundGames.size();
     for (int i = 0; i < currRoundGamesSize; i++) {
       Game currGame = currRoundGames.get(i);
       if (currGame.getTeam1Id().equals(teamId)) {
-        return getThePreviousGameIndex(currRoundIndex, i, true);
+        return getPrevGameIndex(currRoundIndex, i, true);
       } else if (currGame.getTeam2Id().equals(teamId)) {
-        return getThePreviousGameIndex(currRoundIndex, i, false);
+        return getPrevGameIndex(currRoundIndex, i, false);
       }
     }
-
-    throw new UnsupportedOperationException(
-        "Cannot get previous game index, team not found: " + teamId);
+    return -1;
   }
 
   @Override
   public List<Round> createAllRounds() {
-    if (!hasRound()) {
-      initFirstRound();
-    }
+    rounds = new LinkedList<>();
+    Collections.shuffle(teams);
+
+    while (createNextRound())
+      ;
+    return rounds;
+    // same as:
+    // if (!hasRound()) {
+    //   initFirstRound();
+    // }
+    // while (!rounds.getLast().isFinal()) {
+    //   createNextRound();
+    // }
+    // return rounds;
+  }
+
+  @Override
+  public List<Round> updateAllRounds() {
+    if (!hasRound()) createAllRounds();
+
     while (!rounds.getLast().isFinal()) {
-      createNextRound();
+      updateRound(rounds.size() - 1);
     }
     return rounds;
   }
 
   @Override
-  public List<Round> updateAllRounds() {
-    if (!hasRound()) {
-      createAllRounds();
+  public List<TeamTracker> getRanks() {
+    List<TeamTracker> ranks = new ArrayList<>(teams);
+    ranks.sort((team1, team2) -> team1.getRank() - team2.getRank());
+    return ranks;
+  }
+
+  @Override
+  public Game getGame(String id) {
+    for (Round round : rounds) {
+      for (Game game : round.getGames()) {
+        String gameId = game.getId();
+        if (gameId != null && gameId.equals(id)) {
+          return game;
+        }
+      }
     }
-    while (!rounds.getLast().isFinal()) {
-      updateRound(rounds.size() - 1);
-    }
-    return rounds;
+    return null;
   }
 }

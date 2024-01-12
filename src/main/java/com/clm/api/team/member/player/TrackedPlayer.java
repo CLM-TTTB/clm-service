@@ -4,13 +4,14 @@ import com.clm.api.card.Card;
 import com.clm.api.card.CardFactory;
 import com.clm.api.card.RedCard;
 import com.clm.api.card.YellowCard;
-import com.clm.api.game.GameDetail;
+import com.clm.api.game.Game;
 import com.clm.api.interfaces.ICard;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.springframework.data.annotation.Transient;
 
 /** TrackedPlayer */
@@ -25,7 +26,18 @@ public class TrackedPlayer extends Player implements ICard {
   private LinkedList<PositionTracker> positions;
 
   @lombok.Builder.Default private LinkedList<Card> yellowCards = new LinkedList<>();
+
+  @Override
+  public List<Card> getYellowCards() {
+    return yellowCards;
+  }
+
   @lombok.Builder.Default private LinkedList<Card> redCards = new LinkedList<>();
+
+  @Override
+  public List<Card> getRedCards() {
+    return redCards;
+  }
 
   @Override
   public int getNumberOfRedCards() {
@@ -50,18 +62,21 @@ public class TrackedPlayer extends Player implements ICard {
     super();
     this.yellowCards = new LinkedList<>();
     this.redCards = new LinkedList<>();
+    this.id = UUID.randomUUID().toString();
   }
 
   public TrackedPlayer(TrackedPlayer player) {
     super(player);
     this.yellowCards = new LinkedList<>();
     this.redCards = new LinkedList<>();
+    this.id = UUID.randomUUID().toString();
   }
 
   public TrackedPlayer(Player player) {
     super(player);
     this.yellowCards = new LinkedList<>();
     this.redCards = new LinkedList<>();
+    this.id = UUID.randomUUID().toString();
   }
 
   /**
@@ -90,7 +105,7 @@ public class TrackedPlayer extends Player implements ICard {
     return false;
   }
 
-  public boolean isSuspended(GameDetail game) {
+  public boolean isSuspended(Game game) {
     return isSuspended(game.getPreviousGameId());
   }
 

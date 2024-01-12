@@ -1,53 +1,63 @@
-// package com.clm.api.game;
+package com.clm.api.game;
 
-// import com.clm.api.enums.CompetitionType;
-// import com.clm.api.game.Round.GameInfo;
-// import com.clm.api.game.Round.TeamTracker;
-// import com.clm.api.interfaces.IRoundMaker;
-// import com.clm.api.utils.Pair;
-// import java.util.ArrayList;
-// import java.util.List;
+import com.clm.api.enums.CompetitionType;
+import com.clm.api.utils.DuplicatePair;
+import java.util.List;
+import lombok.val;
 
-// /** RoundRobinGameTracker */
-// @lombok.Getter
-// @lombok.Setter
-// @lombok.experimental.SuperBuilder
-// public class RoundRobinGameTracker extends GameTracker implements IRoundMaker {
+@lombok.Getter
+@lombok.Setter
+public class RoundRobinGameTracker extends GameTracker {
 
-//   private Round round;
+  private Round round;
 
-//   public RoundRobinGameTracker(String tournamentId, List<String> teamIds) {
-//     super(tournamentId, teamIds, CompetitionType.ROUND_ROBIN);
-//   }
+  public RoundRobinGameTracker(String tournamentId, String creatorId, List<TeamTracker> teams) {
+    super(tournamentId, creatorId, teams, CompetitionType.ROUND_ROBIN);
+    validateTeamIds(teams);
+    this.round = new Round();
+  }
 
-//   @Override
-//   public void initFirstRound() {
-//     for (int i = 0; i < teamIds.size(); i++) {
-//       for (int j = i + 1; j < teamIds.size(); j++) {
-//         List<GameInfo> games = new ArrayList<>();
-//         Pair<TeamTracker, TeamTracker> teams =
-//             Pair.of(new TeamTracker(teamIds.get(0)), new TeamTracker(teamIds.get(1)));
-//         games.add(new GameInfo(teams));
-//         rounds.add(new Round(games));
-//       }
-//     }
-//   }
+  private void validateTeamIds(List<TeamTracker> teams) {
+    if (teams == null || teams.size() < 2) {
+      throw new UnsupportedOperationException(
+          "Cannot create KnockOutGameTracker, not enough teams provided: " + teams.size());
+    }
+  }
 
-//   @Override
-//   public void createNextRound() {
-//     // TODO Auto-generated method stub
-//     throw new UnsupportedOperationException("Unimplemented method 'createNextRound'");
-//   }
+  @Override
+  public List<Round> updateAllRounds() {
+    if (round.getGames().isEmpty()) {
+      return createAllRounds();
+    }
 
-//   @Override
-//   public void updateRound(int roundIndex) {
-//     // TODO Auto-generated method stub
-//     throw new UnsupportedOperationException("Unimplemented method 'updateRound'");
-//   }
+    return List.of(round);
+  }
 
-//   @Override
-//   public void createAllRounds() {
-//     // TODO Auto-generated method stub
-//     throw new UnsupportedOperationException("Unimplemented method 'createAllRounds'");
-//   }
-// }
+  @Override
+  public List<Round> createAllRounds() {
+    List<Game> games = round.getGames();
+    for (int i = 0; i < teams.size() - 1; i++) {
+      for (int j = i + 1; j < teams.size(); j++) {
+        val gameTrackers = new DuplicatePair<>(teams.get(i), teams.get(j));
+        games.add(new Game(gameTrackers, this.getTournamentId()));
+      }
+    }
+    return List.of(round);
+  }
+
+  @Override
+  public List<TeamTracker> getRanks() {
+
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getRanks'");
+  }
+
+  @Override
+  public Game getGame(String id) {
+    for (Game game : round.getGames()) {
+      String gameId = game.getId();
+      if (gameId != null && gameId.equals(id)) return game;
+    }
+    return null;
+  }
+}

@@ -68,7 +68,7 @@ public class TeamServiceImpl implements TeamService {
               .findByIdAndCreatorId((String) identifyFields.get("id"), user.getId())
               .orElseThrow(() -> new NotFoundException("Team not found"));
 
-      if (team.getStatus() == Team.Status.PENDING) {
+      if (team.getStatus() != Team.Status.ACCEPTED) {
         Tournament tournament =
             tournamentRepository
                 .findById(team.getTournamentId())
@@ -100,7 +100,7 @@ public class TeamServiceImpl implements TeamService {
             });
         return teamRepository.save(ValidationHelper.validate(team));
       } else {
-        throw new InvalidException("Team is not pending, cannot update team");
+        throw new InvalidException("Team is already accepted, cannot update team");
       }
 
     } else {
