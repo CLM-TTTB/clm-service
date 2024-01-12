@@ -34,19 +34,19 @@ public class KnockOutTeamTracker extends TeamTracker {
 
   @Override
   public void win(TeamTracker loser, int goalsFor, int goalsAgainst) {
-    this.goalsFor = goalsFor;
+    // this.goalsFor = goalsFor;
     this.goalDifference += goalsFor - goalsAgainst;
   }
 
   @Override
   public void lose(TeamTracker winner, int goalsFor, int goalsAgainst) {
-    this.goalsFor = goalsFor;
+    // this.goalsFor = goalsFor;
     this.goalDifference += goalsFor - goalsAgainst;
   }
 
   @Override
   public void draw(TeamTracker opponent, int goalsFor, int goalsAgainst) {
-    this.goalsFor = goalsFor;
+    // this.goalsFor = goalsFor;
     this.goalDifference += goalsFor - goalsAgainst;
   }
 }

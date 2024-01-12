@@ -18,9 +18,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.Instant;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -108,7 +107,7 @@ public class Tournament implements IPatchSubject {
 
   @lombok.Builder.Default private int totalEnrolledTeams = 0;
 
-  @JsonIgnore @lombok.Builder.Default private Set<TeamTracker> acceptedTeams = new HashSet<>();
+  @JsonIgnore @lombok.Builder.Default private List<TeamTracker> acceptedTeams = new ArrayList<>();
 
   @lombok.Builder.Default private int totalAcceptedTeams = 0;
 
@@ -130,7 +129,7 @@ public class Tournament implements IPatchSubject {
     this.totalAcceptedTeams = 0;
     this.viewOnly = false;
     this.cancelled = false;
-    this.acceptedTeams = new HashSet<>();
+    this.acceptedTeams = new ArrayList<>();
   }
 
   public boolean isEnoughPlayersPerTeam(List<TeamMember> members) {
@@ -165,9 +164,12 @@ public class Tournament implements IPatchSubject {
   }
 
   public void acceptTeam(Team team) {
-    if (acceptedTeams.add(new KnockOutTeamTracker(team.getId(), team.getName()))) {
-      totalAcceptedTeams++;
+    if (acceptedTeams.stream()
+        .anyMatch((teamTracker) -> teamTracker.getId().equals(team.getId()))) {
+      return;
     }
+    acceptedTeams.add(new KnockOutTeamTracker(team.getId(), team.getName()));
+    totalAcceptedTeams++;
   }
 
   public void rejectTeam(Team team) {
