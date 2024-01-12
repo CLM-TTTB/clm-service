@@ -3,8 +3,10 @@ package com.clm.api.game;
 import com.clm.api.exceptions.business.NotFoundException;
 import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
+import com.clm.api.utils.ValidationHelper;
 import java.lang.reflect.Field;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.Map;
 import java.util.function.BiFunction;
 import org.springframework.stereotype.Service;
@@ -37,11 +39,15 @@ public class GameServiceImpl implements GameService {
 
             updateFields.forEach(
                 (k, v) -> {
+                  if (k == "startTime") {
+                    v = Instant.parse((String) v);
+                  }
                   Field field = ReflectionUtils.findField(game.getClass(), k);
+
                   field.setAccessible(true);
                   ReflectionUtils.setField(field, game, v);
                 });
-            return game;
+            return ValidationHelper.validate(game);
           },
           connectedUser);
 

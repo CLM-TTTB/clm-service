@@ -8,11 +8,13 @@ import com.clm.api.interfaces.IRankObserver;
 import com.clm.api.utils.DuplicatePair;
 import com.clm.api.utils.SH256Hasher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.FutureOrPresent;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.annotation.Transient;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @lombok.NoArgsConstructor
 @lombok.Getter
@@ -45,7 +47,8 @@ public class Game implements IRank, IPatchSubject {
   private String description;
   private String stadium;
 
-  private Instant startTime;
+  @FutureOrPresent @DateTimeFormat private Instant startTime;
+
   private long durationMs;
   private long injuryTimeMs = 0;
 
