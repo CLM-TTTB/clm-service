@@ -20,7 +20,6 @@ public class GameServiceImpl implements GameService {
   public Game patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
-      String[] ignoreFields,
       Principal connectedUser) {
     if (updateFields == null || updateFields.isEmpty()) {
       throw new IllegalArgumentException("No field to update");
@@ -36,7 +35,7 @@ public class GameServiceImpl implements GameService {
                   () -> new NotFoundException("Game Tracker not found for this tournament"));
       Game game = gameTracker.getGame((String) (identifyFields.get("gameId")));
 
-      for (String ignoreField : ignoreFields) {
+      for (String ignoreField : game.getIgnoredFields()) {
         updateFields.remove(ignoreField);
       }
 
@@ -67,6 +66,8 @@ public class GameServiceImpl implements GameService {
     if (game == null) {
       throw new NotFoundException("Game not found. Please check if game is white visit");
     }
+    game.setWinner(0);
+    gameTrackerRepository.save(gameTracker);
 
     return game;
   }

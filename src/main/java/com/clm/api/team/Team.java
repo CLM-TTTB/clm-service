@@ -2,6 +2,7 @@ package com.clm.api.team;
 
 import com.clm.api.constants.Regex;
 import com.clm.api.constants.message.ErrorMessage;
+import com.clm.api.interfaces.IPatchSubject;
 import com.clm.api.team.member.TeamMember;
 import com.clm.api.team.member.player.Player;
 import com.clm.api.team.member.player.TrackedPlayer;
@@ -23,12 +24,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @lombok.Setter
 @lombok.experimental.SuperBuilder
 @Document(collection = "teams")
-public class Team {
+public class Team implements IPatchSubject {
 
   public enum Status {
     PENDING,
     ACCEPTED,
     REFUSED,
+  }
+
+  @Override
+  public String[] getIgnoredFields() {
+    return new String[] {"id", "creatorId", "tournamentId", "status", "createdAt", "updatedAt"};
   }
 
   @Transient private static final long serialVersionUID = 1L;

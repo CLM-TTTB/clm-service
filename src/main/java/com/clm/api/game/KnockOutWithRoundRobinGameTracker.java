@@ -60,12 +60,16 @@ public class KnockOutWithRoundRobinGameTracker extends GameTracker {
 
   @Override
   public List<TeamTracker> getRanks() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getRanks'");
+    return null;
   }
 
   @Override
   public Game getGame(String id) {
+    return null;
+  }
+
+  @Override
+  public List<Game> getGames() {
     return null;
   }
 }

@@ -52,19 +52,7 @@ public class TournamentController {
       Principal connectedUser) {
 
     return ResponseEntity.ok(
-        tournamentService.patch(
-            Map.of("id", id),
-            updateFields,
-            new String[] {
-              "id",
-              "creatorId",
-              "totalEnrolledTeams",
-              "totalAcceptedTeams",
-              "acceptedTeams",
-              "createdAt",
-              "updatedAt"
-            },
-            connectedUser));
+        tournamentService.patch(Map.of("id", id), updateFields, connectedUser));
   }
 
   @GetMapping("/{id}")

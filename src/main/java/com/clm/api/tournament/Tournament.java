@@ -7,6 +7,7 @@ import com.clm.api.enums.CompetitionType;
 import com.clm.api.enums.Visibility;
 import com.clm.api.game.KnockOutTeamTracker;
 import com.clm.api.game.TeamTracker;
+import com.clm.api.interfaces.IPatchSubject;
 import com.clm.api.team.Team;
 import com.clm.api.team.member.TeamMember;
 import com.clm.api.team.member.player.Player;
@@ -34,13 +35,26 @@ import org.springframework.format.annotation.DateTimeFormat;
 @lombok.AllArgsConstructor
 @ValidTournament
 @Document(collection = "tournaments")
-public class Tournament {
+public class Tournament implements IPatchSubject {
   public enum Status {
     UNVERIFIED,
     UPCOMING,
     ONGOING,
     FINISHED,
     CANCELLED
+  }
+
+  @Override
+  public String[] getIgnoredFields() {
+    return new String[] {
+      "id",
+      "creatorId",
+      "totalEnrolledTeams",
+      "totalAcceptedTeams",
+      "acceptedTeams",
+      "createdAt",
+      "updatedAt"
+    };
   }
 
   @Id private String id;

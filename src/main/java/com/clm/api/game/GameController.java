@@ -28,11 +28,6 @@ public class GameController {
       @PathVariable("id") String id,
       @RequestBody Map<String, Object> updateFields,
       Principal connectedUser) {
-    return ResponseEntity.ok(
-        gameService.patch(
-            Map.of("id", id),
-            updateFields,
-            new String[] {"id", "tournamentId", "score", "rank", "createdAt", "updatedAt"},
-            connectedUser));
+    return ResponseEntity.ok(gameService.patch(Map.of("id", id), updateFields, connectedUser));
   }
 }

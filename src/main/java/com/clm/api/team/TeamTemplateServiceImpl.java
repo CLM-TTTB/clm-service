@@ -66,7 +66,6 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
   public TeamTemplate patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
-      String[] ignoreFields,
       Principal connectedUser) {
     if (updateFields == null || updateFields.isEmpty()) {
       throw new IllegalArgumentException("No field to update");
@@ -79,7 +78,7 @@ public class TeamTemplateServiceImpl implements TeamTemplateService {
               .findByIdAndCreatorId((String) identifyFields.get("id"), user.getId())
               .orElseThrow(() -> new NotFoundException("Team template not found"));
 
-      for (String ignoreField : ignoreFields) {
+      for (String ignoreField : template.getIgnoredFields()) {
         updateFields.remove(ignoreField);
       }
 

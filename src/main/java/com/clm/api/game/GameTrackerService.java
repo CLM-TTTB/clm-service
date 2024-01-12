@@ -1,12 +1,17 @@
 package com.clm.api.game;
 
-import com.clm.api.interfaces.CRUDService;
 import java.security.Principal;
+import java.util.List;
 
 /** GameTrackerService */
-public interface GameTrackerService extends CRUDService<GameTracker, String> {
+public interface GameTrackerService {
 
   GameTracker schedule(String tournamentId, Integer maxTeamPerTable, Principal connectedUser);
 
+  List<Game> scheduleAndGetGameFlatList(
+      String tournamentId, Integer maxTeamPerTable, Principal connectedUser);
+
   GameTracker refreshSchedule(String tournamentId, Principal connectedUser);
+
+  List<Game> refreshScheduleGamesAndGetGameFlatList(String tournamentId, Principal connectedUser);
 }

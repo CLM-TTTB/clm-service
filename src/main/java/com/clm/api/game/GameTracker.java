@@ -18,6 +18,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "game_trackers")
 public abstract class GameTracker implements IRoundMaker {
 
+  private boolean allowReCreated = true;
+
   @Id private String tournamentId;
   private String creatorId;
   private CompetitionType type;
@@ -39,4 +41,7 @@ public abstract class GameTracker implements IRoundMaker {
   public abstract List<TeamTracker> getRanks();
 
   public abstract Game getGame(String id);
+
+  @JsonIgnore
+  public abstract List<Game> getGames();
 }

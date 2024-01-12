@@ -60,4 +60,9 @@ public class RoundRobinGameTracker extends GameTracker {
     }
     return null;
   }
+
+  @Override
+  public List<Game> getGames() {
+    return round.getGames();
+  }
 }

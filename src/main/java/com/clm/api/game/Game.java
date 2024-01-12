@@ -1,5 +1,6 @@
 package com.clm.api.game;
 
+import com.clm.api.interfaces.IPatchSubject;
 import com.clm.api.interfaces.IRank;
 import com.clm.api.interfaces.IRankObserver;
 import com.clm.api.utils.DuplicatePair;
@@ -17,7 +18,22 @@ import org.springframework.data.annotation.Transient;
 @lombok.NoArgsConstructor
 @lombok.Getter
 @lombok.Setter
-public class Game implements IRank {
+public class Game implements IRank, IPatchSubject {
+
+  @Override
+  public String[] getIgnoredFields() {
+    return new String[] {
+      "id",
+      "tournamentId",
+      "score",
+      "rank",
+      "createdAt",
+      "updatedAt",
+      "previousGameIds",
+      "observers",
+      "teams",
+    };
+  }
 
   private DuplicatePair<TeamTracker> teams;
   private String id;
@@ -183,5 +199,10 @@ public class Game implements IRank {
   @Override
   public Instant getRankingTime() {
     return rankingTime == null ? Instant.EPOCH : rankingTime;
+  }
+
+  @Override
+  public String toString() {
+    return "Game []";
   }
 }

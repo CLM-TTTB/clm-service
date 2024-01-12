@@ -56,7 +56,6 @@ public class TournamentServiceImpl implements TournamentService {
   public Tournament patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
-      String[] ignoreFields,
       Principal connectedUser) {
     if (updateFields == null || updateFields.isEmpty()) {
       throw new IllegalArgumentException("No field to update");
@@ -78,7 +77,7 @@ public class TournamentServiceImpl implements TournamentService {
             "Please remove some teams before decreasing the maximum number of teams");
       }
 
-      for (String ignoreField : ignoreFields) {
+      for (String ignoreField : tournament.getIgnoredFields()) {
         updateFields.remove(ignoreField);
       }
 

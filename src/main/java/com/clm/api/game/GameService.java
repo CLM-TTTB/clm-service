@@ -12,6 +12,5 @@ public interface GameService {
   Game patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
-      String[] ignoreFields,
       Principal connectedUser);
 }

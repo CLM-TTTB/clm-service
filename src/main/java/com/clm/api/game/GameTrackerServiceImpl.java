@@ -2,14 +2,13 @@ package com.clm.api.game;
 
 import com.clm.api.exceptions.business.InvalidException;
 import com.clm.api.exceptions.business.NotFoundException;
-import com.clm.api.team.TeamRepository;
 import com.clm.api.tournament.Tournament;
 import com.clm.api.tournament.TournamentRepository;
 import com.clm.api.user.User;
 import com.clm.api.utils.PrincipalHelper;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 /** GameTrackerServiceImpl */
@@ -19,40 +18,6 @@ public class GameTrackerServiceImpl implements GameTrackerService {
 
   private final GameTrackerRepository gameTrackerRepository;
   private final TournamentRepository tournamentRepository;
-  private final TeamRepository teamRepository;
-
-  @Override
-  public GameTracker get(String id) throws NotFoundException {
-    return gameTrackerRepository
-        .findById(id)
-        .orElseThrow(() -> new NotFoundException("Game Tracker not found"));
-  }
-
-  @Override
-  public GameTracker create(GameTracker t, Principal connectedUser) {
-    throw new UnsupportedOperationException("Unimplemented method 'create'");
-  }
-
-  @Override
-  public GameTracker update(GameTracker t, Principal connectedUser) {
-    throw new UnsupportedOperationException("Unimplemented method 'update'");
-  }
-
-  @Override
-  public GameTracker patch(
-      Map<String, Object> identifyFields,
-      Map<String, Object> updateFields,
-      String[] ignoreFields,
-      Principal connectedUser) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'patch'");
-  }
-
-  @Override
-  public void delete(String id, Principal connectedUser) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'delete'");
-  }
 
   @Override
   public GameTracker schedule(
@@ -100,6 +65,20 @@ public class GameTrackerServiceImpl implements GameTrackerService {
             .orElseThrow(() -> new NotFoundException("Tournament not found"));
 
     gameTracker.updateAllRounds();
-    return gameTracker;
+    return gameTrackerRepository.save(gameTracker);
+  }
+
+  @Override
+  public List<Game> scheduleAndGetGameFlatList(
+      String tournamentId, Integer maxTeamPerTable, Principal connectedUser) {
+    GameTracker gameTracker = schedule(tournamentId, maxTeamPerTable, connectedUser);
+    return gameTracker.getGames();
+  }
+
+  @Override
+  public List<Game> refreshScheduleGamesAndGetGameFlatList(
+      String tournamentId, Principal connectedUser) {
+    GameTracker gameTracker = refreshSchedule(tournamentId, connectedUser);
+    return gameTracker.getGames();
   }
 }

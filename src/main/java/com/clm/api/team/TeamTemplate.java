@@ -2,6 +2,7 @@ package com.clm.api.team;
 
 import com.clm.api.constants.Regex;
 import com.clm.api.constants.message.ErrorMessage;
+import com.clm.api.interfaces.IPatchSubject;
 import com.clm.api.team.member.TeamMember;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -20,7 +21,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @lombok.Builder
 @lombok.AllArgsConstructor
 @Document(collection = "team_templates")
-public class TeamTemplate {
+public class TeamTemplate implements IPatchSubject {
+
+  @Override
+  public String[] getIgnoredFields() {
+    return new String[] {"id", "creatorId", "createdAt", "updatedAt"};
+  }
 
   @Transient private static final long serialVersionUID = 1L;
 

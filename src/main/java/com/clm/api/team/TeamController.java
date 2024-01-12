@@ -23,12 +23,7 @@ public class TeamController {
       @PathVariable("id") String id,
       @RequestBody Map<String, Object> updateFields,
       Principal connectedUser) {
-    return ResponseEntity.ok(
-        teamService.patch(
-            Map.of("id", id),
-            updateFields,
-            new String[] {"id", "creatorId", "tournamentId", "status", "createdAt", "updatedAt"},
-            connectedUser));
+    return ResponseEntity.ok(teamService.patch(Map.of("id", id), updateFields, connectedUser));
   }
 
   @GetMapping("/{id}")

@@ -55,7 +55,6 @@ public class TeamServiceImpl implements TeamService {
   public Team patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
-      String[] ignoreFields,
       Principal connectedUser) {
     if (updateFields == null || updateFields.isEmpty()) {
       throw new IllegalArgumentException("No field to update");
@@ -79,7 +78,7 @@ public class TeamServiceImpl implements TeamService {
           throw new InvalidException("Tournament enrollment is closed, cannot update team");
         }
 
-        for (String ignoreField : ignoreFields) {
+        for (String ignoreField : team.getIgnoredFields()) {
           updateFields.remove(ignoreField);
         }
 

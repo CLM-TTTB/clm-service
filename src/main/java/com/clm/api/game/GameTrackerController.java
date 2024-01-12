@@ -17,7 +17,7 @@ public class GameTrackerController {
 
   public final GameTrackerService gameTrackerService;
 
-  @PostMapping("/{tournamentId}")
+  @PostMapping("/tree/{tournamentId}")
   public ResponseEntity<?> scheduleGames(
       @RequestParam(defaultValue = "4") Integer maxTeamPerTable,
       @PathVariable("tournamentId") String tournamentId,
@@ -26,9 +26,26 @@ public class GameTrackerController {
         gameTrackerService.schedule(tournamentId, maxTeamPerTable, connectedUser));
   }
 
-  @PatchMapping("/{tournamentId}")
+  @PostMapping("/{tournamentId}")
+  public ResponseEntity<?> scheduleGameAndGetGameFlatList(
+      @RequestParam(defaultValue = "4") Integer maxTeamPerTable,
+      @PathVariable("tournamentId") String tournamentId,
+      Principal connectedUser) {
+    return ResponseEntity.ok(
+        gameTrackerService.scheduleAndGetGameFlatList(
+            tournamentId, maxTeamPerTable, connectedUser));
+  }
+
+  @PatchMapping("/tree/{tournamentId}")
   public ResponseEntity<?> refreshScheduleGames(
       @PathVariable("tournamentId") String tournamentId, Principal connectedUser) {
     return ResponseEntity.ok(gameTrackerService.refreshSchedule(tournamentId, connectedUser));
+  }
+
+  @PatchMapping("/{tournamentId}")
+  public ResponseEntity<?> refreshScheduleGamesAndGetGameFlatList(
+      @PathVariable("tournamentId") String tournamentId, Principal connectedUser) {
+    return ResponseEntity.ok(
+        gameTrackerService.refreshScheduleGamesAndGetGameFlatList(tournamentId, connectedUser));
   }
 }

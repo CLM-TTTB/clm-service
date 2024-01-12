@@ -16,7 +16,6 @@ public interface CRUDService<T, ID> {
   T patch(
       Map<String, Object> identifyFields,
       Map<String, Object> updateFields,
-      String[] ignoreFields,
       Principal connectedUser);
 
   void delete(ID id, Principal connectedUser);

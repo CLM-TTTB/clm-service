@@ -145,6 +145,11 @@ public class KnockOutGameTracker extends GameTracker {
 
   @Override
   public List<Round> createAllRounds() {
+    if (!isAllowReCreated()) {
+      if (hasRound()) return rounds;
+      return new LinkedList<>();
+    }
+
     rounds = new LinkedList<>();
     Collections.shuffle(teams);
 
@@ -163,10 +168,12 @@ public class KnockOutGameTracker extends GameTracker {
 
   @Override
   public List<Round> updateAllRounds() {
-    if (!hasRound()) createAllRounds();
+    if (!hasRound()) {
+      return createAllRounds();
+    }
 
-    while (!rounds.getLast().isFinal()) {
-      updateRound(rounds.size() - 1);
+    for (int i = 0; i < rounds.size(); i++) {
+      updateRound(i);
     }
     return rounds;
   }
@@ -189,5 +196,14 @@ public class KnockOutGameTracker extends GameTracker {
       }
     }
     return null;
+  }
+
+  @Override
+  public List<Game> getGames() {
+    List<Game> games = new ArrayList<>();
+    for (Round round : rounds) {
+      games.addAll(round.getGames());
+    }
+    return games;
   }
 }
