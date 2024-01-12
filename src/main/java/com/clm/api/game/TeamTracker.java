@@ -66,4 +66,8 @@ public abstract class TeamTracker implements IIdTracker<String>, IRankObserver {
   public abstract void lose(TeamTracker winner, int goalsFor, int goalsAgainst);
 
   public abstract void draw(TeamTracker opponent, int goalsFor, int goalsAgainst);
+
+  public boolean equals(TeamTracker teamTracker) {
+    return this.id.equals(teamTracker.getId());
+  }
 }

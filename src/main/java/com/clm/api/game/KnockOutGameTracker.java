@@ -32,7 +32,6 @@ public class KnockOutGameTracker extends GameTracker {
   }
 
   private void initFirstRound() {
-    // List<Game> games = new ArrayList<>();
     Round firstRound = new Round();
 
     int numberOfTeams = teams.size();
@@ -40,7 +39,6 @@ public class KnockOutGameTracker extends GameTracker {
     for (int i = 0; i < numberOfTeams - 1; i += 2) {
       val teamTrackers = new DuplicatePair<>(teams.get(i), teams.get(i + 1));
 
-      // games.add(new Game(teamTrackers, this.getTournamentId()));
       firstRound.addGame(new Game(teamTrackers, this.getTournamentId()));
     }
 
@@ -48,11 +46,8 @@ public class KnockOutGameTracker extends GameTracker {
       val teamTrackers = new DuplicatePair<>(teams.get(numberOfTeams - 1), null);
 
       firstRound.addGame(new Game(teamTrackers, 0, 0, 0));
-      // games.add(new Game(teamTrackers, 0, 0, 0));
     }
     rounds.add(firstRound);
-
-    // rounds.add(new Round(games));
   }
 
   private boolean createNextRound() {
@@ -65,13 +60,10 @@ public class KnockOutGameTracker extends GameTracker {
 
       int numberOfPrevGames = prevRoundGames.size();
 
-      // List<Game> nextRoundGames = new ArrayList<>();
-
       for (int i = 0; i < numberOfPrevGames - 1; i += 2) {
         val teamTrackers =
             new DuplicatePair<>(
                 prevRoundGames.get(i).getWinner(), prevRoundGames.get(i + 1).getWinner());
-        // nextRoundGames.add(new Game(teamTrackers, this.getTournamentId()));
         nextRound.addGame(new Game(teamTrackers, this.getTournamentId()));
       }
 
@@ -79,12 +71,10 @@ public class KnockOutGameTracker extends GameTracker {
         val teamTrackers =
             new DuplicatePair<>(prevRoundGames.get(numberOfPrevGames - 1).getWinner(), null);
 
-        // nextRoundGames.add(new Game(teamTrackers, 0, 0, 0));
         nextRound.addGame(new Game(teamTrackers, 0, 0, 0));
       }
 
       return rounds.add(nextRound);
-      // return rounds.add(new Round(nextRoundGames));
     } else {
       initFirstRound();
       return true;
