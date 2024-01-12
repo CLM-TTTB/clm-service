@@ -106,7 +106,7 @@ public class TrackedPlayer extends Player implements ICard {
   }
 
   public boolean isSuspended(Game game) {
-    return isSuspended(game.getPreviousGameId());
+    return false;
   }
 
   public List<String> getPlayedGameIds() {

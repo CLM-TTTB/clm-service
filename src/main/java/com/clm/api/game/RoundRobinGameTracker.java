@@ -47,8 +47,6 @@ public class RoundRobinGameTracker extends GameTracker {
 
   @Override
   public List<TeamTracker> getRanks() {
-
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getRanks'");
   }
 
