@@ -2,6 +2,7 @@ package com.clm.api.user;
 
 import com.clm.api.exceptions.business.InvalidException;
 import java.security.Principal;
+import java.util.Map;
 
 /** UserService */
 public interface UserService {
@@ -13,7 +14,7 @@ public interface UserService {
    * @param connectedUser The connected user
    * @throws InvalidException If the old password is not correct
    */
-  public void changePassword(ChangePasswordRequest request, Principal connectedUser)
+  void changePassword(ChangePasswordRequest request, Principal connectedUser)
       throws InvalidException;
 
   /**
@@ -23,5 +24,7 @@ public interface UserService {
    * @param connectedUser The connected user
    * @return The new avatar
    */
-  public String updateAvatar(String avatar, Principal connectedUser);
+  String updateAvatar(String avatar, Principal connectedUser);
+
+  Map<String, Object> changeProfile(ChangeProfileRequest request, Principal connectedUser);
 }

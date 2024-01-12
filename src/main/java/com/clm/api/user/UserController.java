@@ -35,6 +35,12 @@ public class UserController {
     userService.changePassword(request, connectedUser);
   }
 
+  @PatchMapping("/change-profile")
+  public ResponseEntity<?> changePassword(
+      @RequestBody ChangeProfileRequest request, Principal connectedUser) {
+    return ResponseEntity.ok(userService.changeProfile(request, connectedUser));
+  }
+
   @GetMapping("/registered-teams")
   public ResponseEntity<?> getAllRegisteredTeamsOfUser(
       @PageableDefault(page = 0, size = 9, sort = "createAt", direction = Direction.DESC)

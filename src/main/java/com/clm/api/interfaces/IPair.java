@@ -15,6 +15,8 @@ public interface IPair<F, S> {
 
   boolean isEnough();
 
+  boolean isEmpty();
+
   boolean hasFirst();
 
   boolean hasSecond();

@@ -48,6 +48,11 @@ public class Pair<F, S> implements IPair<F, S> {
   }
 
   @Override
+  public boolean isEmpty() {
+    return first == null && second == null;
+  }
+
+  @Override
   public boolean has(int index) {
     if (index == 0) {
       return hasFirst();

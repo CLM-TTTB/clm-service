@@ -55,10 +55,13 @@ public class User implements UserDetails {
   @JsonIgnore
   private String password;
 
+  @Pattern(regexp = Regex.PHONE_NUMBER, message = ErrorMessage.PHONE_NUMBER_INVALID)
+  @lombok.Builder.Default
+  private String phoneNo = "";
+
   @NotNull @JsonIgnore private EmailVerificationToken emailVerificationToken;
 
-  @lombok.Builder.Default
-  private String name = "User" + System.currentTimeMillis() + new Random().nextInt(100000);
+  @lombok.Builder.Default private String name = randomName();
 
   @lombok.Builder.Default private String avatar = "";
 
@@ -72,8 +75,13 @@ public class User implements UserDetails {
 
   public User() {
     this.avatar = "";
-    this.name = "User" + System.currentTimeMillis() + new Random().nextInt(100000);
+    this.phoneNo = "";
+    this.name = randomName();
     this.status = Status.EMAIL_UNVERIFIED;
+  }
+
+  private static String randomName() {
+    return "User" + System.currentTimeMillis() + new Random().nextInt(100000);
   }
 
   @Override
@@ -129,5 +137,22 @@ public class User implements UserDetails {
   public boolean isEnabled() {
     if (status == Status.EMAIL_UNVERIFIED) throw new UserUnverifiedException(status);
     return status == Status.ACTIVE;
+  }
+
+  public void from(ChangeProfileRequest user) {
+    String newPhoneNo = user.getPhoneNo();
+    if (newPhoneNo != null && !newPhoneNo.isEmpty() && !newPhoneNo.isBlank()) {
+      this.phoneNo = newPhoneNo;
+    }
+
+    String newName = user.getName();
+    if (newName != null && !newName.isEmpty() && !newName.isBlank()) {
+      this.name = newName;
+    }
+
+    String newAvatar = user.getAvatar();
+    if (newAvatar != null && !newAvatar.isEmpty() && !newAvatar.isBlank()) {
+      this.avatar = newAvatar;
+    }
   }
 }

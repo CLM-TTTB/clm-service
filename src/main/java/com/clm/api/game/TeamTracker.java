@@ -20,7 +20,6 @@ public abstract class TeamTracker implements IIdTracker<String>, IRankObserver {
   protected Integer goalDifference = 0;
 
   protected String uniform = "";
-  // protected Integer goalsFor = null;
 
   protected Set<String> previousGameIds = new LinkedHashSet<>();
 

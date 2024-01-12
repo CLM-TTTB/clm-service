@@ -1,5 +1,6 @@
 package com.clm.api.tournament;
 
+import com.clm.api.enums.CompetitionType;
 import com.clm.api.enums.Visibility;
 import com.clm.api.game.GameTrackerService;
 import com.clm.api.team.Team;
@@ -34,6 +35,7 @@ public class TournamentController {
       @PageableDefault(page = 0, size = 9, sort = "startTime", direction = Direction.DESC)
           Pageable pageable,
       @RequestParam(defaultValue = "PUBLISH") Visibility visibility,
+      @RequestParam(required = false) CompetitionType competitionType,
       @RequestParam(required = false) Tournament.Status status) {
 
     return ResponseEntity.ok(tournamentService.getAll(visibility, status, pageable));

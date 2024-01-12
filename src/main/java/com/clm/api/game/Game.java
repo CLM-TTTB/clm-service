@@ -84,6 +84,10 @@ public class Game implements IRank, IPatchSubject {
     return teams != null && teams.isEnough();
   }
 
+  public boolean isNoTeams() {
+    return teams != null && teams.isEmpty();
+  }
+
   public boolean isFinished() {
     return hasWinner() || isTie();
   }
@@ -129,15 +133,13 @@ public class Game implements IRank, IPatchSubject {
         notifyObservers();
       } else throw new NotFoundException("id must be 0 or 1");
     } else {
-      if (winnerId != id && (id != 0 || id == 1)) {
+      if (winnerId != id && (id == 0 || id == 1)) {
         winnerId = id;
         if (teams.has(id)) {
           score[id] = goalsFor;
-          // teams.get(id).setGoalsFor(goalsFor);
           teams.get(id).setGoalDifference(goalsFor - goalsAgainst);
           if (teams.has(1 - id)) {
             score[1 - id] = goalsAgainst;
-            // teams.get(1 - id).setGoalsFor(goalsAgainst);
             teams.get(1 - id).setGoalDifference(goalsAgainst - goalsFor);
             int rankFirst = teams.get(id).getRank();
             teams.get(id).setRank(teams.get(1 - id).getRank());
@@ -147,10 +149,8 @@ public class Game implements IRank, IPatchSubject {
         }
         if (teams.has(1 - id)) {
           score[1 - id] = goalsAgainst;
-          // teams.get(1 - id).setGoalsFor(goalsAgainst);
           teams.get(1 - id).setGoalDifference(goalsAgainst - goalsFor);
           if (teams.has(id)) {
-            // teams.get(id).setGoalsFor(goalsFor);
             score[id] = goalsFor;
             teams.get(id).setGoalDifference(goalsFor - goalsAgainst);
             int rankFirst = teams.get(id).getRank();
@@ -159,6 +159,14 @@ public class Game implements IRank, IPatchSubject {
             return;
           }
         }
+      } else if (winnerId == id
+          && (id == 0 || id == 1)
+          && (score[id] != goalsFor || score[1 - id] != goalsAgainst)
+          && teams.isEnough()) {
+        score[id] = goalsFor;
+        score[1 - id] = goalsAgainst;
+        teams.get(id).setGoalDifference(goalsFor - goalsAgainst);
+        teams.get(1 - id).setGoalDifference(goalsAgainst - goalsFor);
       }
     }
   }

@@ -3,6 +3,7 @@ package com.clm.api.user;
 import com.clm.api.exceptions.business.InvalidException;
 import com.clm.api.utils.PrincipalHelper;
 import java.security.Principal;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,5 +38,20 @@ public class UserServiceImpl implements UserService {
   @Override
   public String updateAvatar(String avatar, Principal connectedUser) {
     throw new UnsupportedOperationException("Unimplemented method 'updateAvatar'");
+  }
+
+  @Override
+  public Map<String, Object> changeProfile(ChangeProfileRequest request, Principal connectedUser) {
+    User user = PrincipalHelper.getUser(connectedUser);
+
+    user.from(request);
+    userRepository.save(user);
+
+    Map<String, Object> result =
+        Map.of(
+            "name", user.getName(),
+            "phoneNo", user.getPhoneNo(),
+            "avatar", user.getAvatar());
+    return result;
   }
 }
