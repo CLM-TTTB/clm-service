@@ -9,15 +9,6 @@ public class KnockOutTeamTracker extends TeamTracker {
   }
 
   @Override
-  public void win() {}
-
-  @Override
-  public void lose() {}
-
-  @Override
-  public void draw() {}
-
-  @Override
   public void update(IRank subscriber) {
     Game game = (Game) subscriber;
     if (game.hasWinner()) {
