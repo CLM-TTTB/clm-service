@@ -26,28 +26,25 @@ public class GameServiceImpl implements GameService {
     }
 
     if (identifyFields.containsKey("gameId") && identifyFields.containsKey("tournamentId")) {
-      User user = PrincipalHelper.getUser(connectedUser);
-      GameTracker gameTracker =
-          gameTrackerRepository
-              .findByTournamentIdAndCreatorId(
-                  (String) identifyFields.get("tournamentId"), user.getId())
-              .orElseThrow(
-                  () -> new NotFoundException("Game Tracker not found for this tournament"));
-      Game game = gameTracker.getGame((String) (identifyFields.get("gameId")));
 
-      for (String ignoreField : game.getIgnoredFields()) {
-        updateFields.remove(ignoreField);
-      }
+      return update(
+          (String) identifyFields.get("tournamentId"),
+          (String) identifyFields.get("gameId"),
+          (game, gameTracker) -> {
+            for (String ignoreField : game.getIgnoredFields()) {
+              updateFields.remove(ignoreField);
+            }
 
-      updateFields.forEach(
-          (k, v) -> {
-            Field field = ReflectionUtils.findField(game.getClass(), k);
-            field.setAccessible(true);
-            ReflectionUtils.setField(field, game, v);
-          });
+            updateFields.forEach(
+                (k, v) -> {
+                  Field field = ReflectionUtils.findField(game.getClass(), k);
+                  field.setAccessible(true);
+                  ReflectionUtils.setField(field, game, v);
+                });
+            return game;
+          },
+          connectedUser);
 
-      gameTrackerRepository.save(gameTracker);
-      return game;
     } else {
       throw new IllegalArgumentException("No field to identify the tournament template");
     }

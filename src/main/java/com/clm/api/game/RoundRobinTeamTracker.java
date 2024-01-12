@@ -13,19 +13,6 @@ public class RoundRobinTeamTracker extends TeamTracker {
   }
 
   @Override
-  public void win() {
-    score += 3;
-  }
-
-  @Override
-  public void lose() {}
-
-  @Override
-  public void draw() {
-    score++;
-  }
-
-  @Override
   public void update(IRank subscriber) {
     Game game = (Game) subscriber;
     if (game.hasWinner()) {

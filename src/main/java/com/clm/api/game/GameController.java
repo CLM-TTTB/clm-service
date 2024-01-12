@@ -24,12 +24,15 @@ public class GameController {
     return ResponseEntity.ok(gameService.get(tournamentId, gameId));
   }
 
-  @PatchMapping("/id")
+  @PatchMapping("/{gameId}")
   public ResponseEntity<?> updateGameDetail(
-      @PathVariable("id") String id,
+      @PathVariable("tournamentId") String tournamentId,
+      @PathVariable("gameId") String gameId,
       @RequestBody Map<String, Object> updateFields,
       Principal connectedUser) {
-    return ResponseEntity.ok(gameService.patch(Map.of("id", id), updateFields, connectedUser));
+    return ResponseEntity.ok(
+        gameService.patch(
+            Map.of("gameId", gameId, "tournamentId", tournamentId), updateFields, connectedUser));
   }
 
   @PatchMapping("/{gameId}/winner/{teamId}")

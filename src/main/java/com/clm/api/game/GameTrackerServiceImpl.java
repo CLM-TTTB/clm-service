@@ -94,4 +94,10 @@ public class GameTrackerServiceImpl implements GameTrackerService {
     GameTracker gameTracker = refreshSchedule(tournamentId, connectedUser);
     return gameTracker.getGames();
   }
+
+  @Override
+  public List<TeamTracker> getRanks(String tournamentId) {
+    GameTracker gameTracker = get(tournamentId);
+    return gameTracker.getRanks();
+  }
 }

@@ -1,6 +1,7 @@
 package com.clm.api.tournament;
 
 import com.clm.api.enums.Visibility;
+import com.clm.api.game.GameTrackerService;
 import com.clm.api.team.Team;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TournamentController {
 
   private final TournamentService tournamentService;
+  private final GameTrackerService gameTrackerService;
 
   @GetMapping("")
   public ResponseEntity<?> getTournaments(
@@ -35,6 +37,11 @@ public class TournamentController {
       @RequestParam(required = false) Tournament.Status status) {
 
     return ResponseEntity.ok(tournamentService.getAll(visibility, status, pageable));
+  }
+
+  @GetMapping("/{id}/ranks")
+  public ResponseEntity<?> getRanks(@PathVariable("id") String id) {
+    return ResponseEntity.ok(gameTrackerService.getRanks(id));
   }
 
   @PostMapping("")

@@ -63,6 +63,7 @@ public class Round {
     return games == null ? false : games.stream().allMatch(Game::hasWinner);
   }
 
+  @JsonIgnore
   public List<IIdTracker<String>> getWinners() {
     if (games == null) return null;
     List<IIdTracker<String>> winnerGames =

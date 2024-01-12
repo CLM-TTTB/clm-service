@@ -18,4 +18,6 @@ public interface GameTrackerService {
   GameTracker refreshSchedule(String tournamentId, Principal connectedUser);
 
   List<Game> refreshScheduleGamesAndGetGameFlatList(String tournamentId, Principal connectedUser);
+
+  List<TeamTracker> getRanks(String tournamentId);
 }
